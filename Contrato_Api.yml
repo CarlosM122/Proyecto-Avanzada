@@ -1,0 +1,401 @@
+
+openapi: 3.0.3
+info:
+  title: API Gestión de Solicitudes Académicas
+  description: >
+    API REST para la gestión integral del ciclo de vida de solicitudes
+    académicas del Programa de Ingeniería.
+    Permite registro, clasificación, priorización, asignación,
+    seguimiento, cierre e integración opcional con IA.
+  version: 1.0.0
+
+servers:
+  - url: https://api.ingenieria.edu.co/v1
+
+tags:
+  - name: Auth
+  - name: Solicitudes
+  - name: Historial
+  - name: IA
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Autenticación de usuario
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [usuario, password]
+              properties:
+                usuario:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Token generado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /solicitudes:
+    post:
+      tags: [Solicitudes]
+      summary: Registrar nueva solicitud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearSolicitudRequest'
+      responses:
+        "201":
+          description: Solicitud creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+
+    get:
+      tags: [Solicitudes]
+      summary: Listar solicitudes con filtros
+      parameters:
+        - in: query
+          name: estado
+          schema:
+            $ref: '#/components/schemas/EstadoSolicitud'
+        - in: query
+          name: prioridad
+          schema:
+            $ref: '#/components/schemas/Prioridad'
+        - in: query
+          name: tipo
+          schema:
+            $ref: '#/components/schemas/TipoSolicitud'
+        - in: query
+          name: responsableId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de solicitudes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Solicitud'
+
+  /solicitudes/{solicitudId}:
+    get:
+      tags: [Solicitudes]
+      summary: Obtener detalle de solicitud
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      responses:
+        "200":
+          description: Solicitud encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+
+  /solicitudes/{solicitudId}/clasificar:
+    post:
+      tags: [Solicitudes]
+      summary: Clasificar solicitud
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClasificacionRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/Ok'
+
+  /solicitudes/{solicitudId}/prioridad:
+    patch:
+      tags: [Solicitudes]
+      summary: Definir prioridad
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrioridadRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/Ok'
+
+  /solicitudes/{solicitudId}/asignacion:
+    patch:
+      tags: [Solicitudes]
+      summary: Asignar responsable
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AsignacionRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/Ok'
+
+  /solicitudes/{solicitudId}/atender:
+    post:
+      tags: [Solicitudes]
+      summary: Iniciar atención de la solicitud
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      responses:
+        "200":
+          $ref: '#/components/responses/Ok'
+
+  /solicitudes/{solicitudId}/resolver:
+    post:
+      tags: [Solicitudes]
+      summary: Marcar solicitud como atendida
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      responses:
+        "200":
+          $ref: '#/components/responses/Ok'
+
+  /solicitudes/{solicitudId}/cerrar:
+    post:
+      tags: [Solicitudes]
+      summary: Cerrar solicitud
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CierreRequest'
+      responses:
+        "200":
+          $ref: '#/components/responses/Ok'
+
+  /solicitudes/{solicitudId}/historial:
+    get:
+      tags: [Historial]
+      summary: Consultar historial auditable
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      responses:
+        "200":
+          description: Eventos del historial
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoHistorial'
+
+  /ia/sugerencia:
+    post:
+      tags: [IA]
+      summary: Sugerir tipo y prioridad automáticamente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [descripcion]
+              properties:
+                descripcion:
+                  type: string
+      responses:
+        "200":
+          description: Sugerencia generada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SugerenciaIA'
+
+  /ia/resumen/{solicitudId}:
+    get:
+      tags: [IA]
+      summary: Generar resumen del historial
+      parameters:
+        - $ref: '#/components/parameters/SolicitudId'
+      responses:
+        "200":
+          description: Resumen generado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resumen:
+                    type: string
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    SolicitudId:
+      name: solicitudId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+
+    CrearSolicitudRequest:
+      type: object
+      required: [tipo, descripcion, canalOrigen, identificacionSolicitante]
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoSolicitud'
+        descripcion:
+          type: string
+        canalOrigen:
+          type: string
+          enum: [CSU, CORREO, SAC, TELEFONICO]
+        identificacionSolicitante:
+          type: string
+
+    ClasificacionRequest:
+      type: object
+      required: [tipo]
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoSolicitud'
+
+    PrioridadRequest:
+      type: object
+      required: [prioridad, justificacion]
+      properties:
+        prioridad:
+          $ref: '#/components/schemas/Prioridad'
+        justificacion:
+          type: string
+
+    AsignacionRequest:
+      type: object
+      required: [responsableId]
+      properties:
+        responsableId:
+          type: string
+          format: uuid
+
+    CierreRequest:
+      type: object
+      required: [observacionCierre]
+      properties:
+        observacionCierre:
+          type: string
+
+    SugerenciaIA:
+      type: object
+      properties:
+        tipoSugerido:
+          $ref: '#/components/schemas/TipoSolicitud'
+        prioridadSugerida:
+          $ref: '#/components/schemas/Prioridad'
+
+    Solicitud:
+      type: object
+      properties:
+        solicitudId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: '#/components/schemas/TipoSolicitud'
+        descripcion:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoSolicitud'
+        prioridad:
+          $ref: '#/components/schemas/Prioridad'
+        responsableId:
+          type: string
+          format: uuid
+          nullable: true
+        fechaRegistro:
+          type: string
+          format: date-time
+        fechaCierre:
+          type: string
+          format: date-time
+          nullable: true
+
+    EventoHistorial:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date-time
+        accion:
+          type: string
+        usuario:
+          type: string
+        observacion:
+          type: string
+
+    TipoSolicitud:
+      type: string
+      enum:
+        - REGISTRO_ASIGNATURA
+        - HOMOLOGACION
+        - CANCELACION
+        - CUPO
+        - CONSULTA_ACADEMICA
+
+    EstadoSolicitud:
+      type: string
+      enum:
+        - REGISTRADA
+        - CLASIFICADA
+        - EN_ATENCION
+        - ATENDIDA
+        - CERRADA
+
+    Prioridad:
+      type: string
+      enum:
+        - BAJA
+        - MEDIA
+        - ALTA
+        - CRITICA
+
+  responses:
+    Ok:
+      description: Operación exitosa
+    BadRequest:
+      description: Error de validación
+    Forbidden:
+      description: Acceso denegado
+    NotFound:
+      description: Recurso no encontrado
