@@ -11,4 +11,8 @@ public class Estudiante extends Usuario {
 
     private Integer semestre;
 
+    @Override
+    public String getRole() {
+        return "ROL_ESTUDIANTE";
+    }
 }

@@ -6,9 +6,10 @@ import uq.sistemagestionsolicitudes.model.Estado;
 import uq.sistemagestionsolicitudes.model.Solicitud;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
+public interface SolicitudRepository extends JpaRepository<Solicitud, UUID> {
     List<Solicitud> findByEstado (Estado estado);
-    List<Solicitud> findBySolicitanteId(Long solicitanteId);
+    List<Solicitud> findBySolicitanteId(UUID solicitanteId);
 }

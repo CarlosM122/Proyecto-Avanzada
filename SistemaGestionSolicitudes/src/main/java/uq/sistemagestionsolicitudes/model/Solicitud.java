@@ -40,4 +40,14 @@ public class Solicitud {
     @JoinColumn(name = "solicitante_id")
     private Usuario solicitante;
 
+    @PrePersist
+    public void prePersist() {
+        if (this.fecha == null) {
+            this.fecha = LocalDate.now();
+        }
+        if (this.estado == null) {
+            this.estado=Estado.REGISTRADA;
+        }
+    }
+
 }

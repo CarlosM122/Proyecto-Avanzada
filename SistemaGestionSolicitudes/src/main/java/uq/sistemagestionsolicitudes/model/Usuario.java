@@ -3,6 +3,8 @@ package uq.sistemagestionsolicitudes.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Data
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -11,12 +13,15 @@ public abstract class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     private String nombre;
 
     private String correo;
 
     private String password;
+
+    @Transient
+    public abstract String getRole();
 
 }

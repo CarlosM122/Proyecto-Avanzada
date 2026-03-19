@@ -2,13 +2,16 @@ package uq.sistemagestionsolicitudes.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uq.sistemagestionsolicitudes.dto.CrearSolicitudRequest;
-import uq.sistemagestionsolicitudes.model.Solicitud;
-import uq.sistemagestionsolicitudes.model.Usuario;
+import uq.sistemagestionsolicitudes.dto.SolicitudResponse;
+import uq.sistemagestionsolicitudes.model.Prioridad;
+import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
 import uq.sistemagestionsolicitudes.service.SolicitudService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/solicitudes")
@@ -16,19 +19,33 @@ import java.util.List;
 public class SolicitudController {
 
     private final SolicitudService solicitudService;
+    private final UsuarioRepository usuarioRepository;
+
     @PostMapping
-    public Solicitud crearSolicitud(@RequestBody CrearSolicitudRequest request){
-        Usuario solicitante = obtenerUsuarioAutenticado();
-        return solicitudService.crearSolicitud(request,solicitante);
+    public SolicitudResponse crearSolicitudRequest(@RequestBody CrearSolicitudRequest request){
+        return solicitudService.crearSolicitud(request);
     }
 
     @GetMapping
-    public List<Solicitud> obtenerSolicitudes(){
-        Usuario usuario = obtenerUsuarioAutenticado();
-        return solicitudService.obtenerSolicitudes(usuario);
+    public List<SolicitudResponse> obtenerSolicitudes(){
+        return solicitudService.obtenerSolicitudes();
     }
 
-    private Usuario obtenerUsuarioAutenticado() {
-        return null;
+//    @PostMapping("/{id}/clasificar")
+//    @PreAuthorize("hasAuthority('ROL_ADMINISTRATIVO')")
+//    public SolicitudResponse clasificarSolicitud(UUID id, @PathVariable ){
+//
+//    }
+
+    @GetMapping("/{id}")
+    public SolicitudResponse obtenerSolicitudDetallada(@PathVariable UUID id){
+        return solicitudService.obtenerSolicitudId(id);
+    }
+
+
+    @PatchMapping("/{id}/prioridad")
+    @PreAuthorize("hasAuthority('ROL_ADMINISTRATIVO')")
+    public SolicitudResponse priorizarSolicitudRequest(@PathVariable UUID id,@RequestBody Prioridad prioridad){
+        return solicitudService.priorizarSolicitud(id,prioridad);
     }
 }

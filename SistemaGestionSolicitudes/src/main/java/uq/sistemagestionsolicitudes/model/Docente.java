@@ -10,4 +10,8 @@ public class Docente extends Usuario {
 
     private String tipoContrato;
 
+    @Override
+    public String getRole() {
+        return "ROL_ESTUDIANTE";
+    }
 }
