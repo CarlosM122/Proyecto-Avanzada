@@ -38,7 +38,7 @@ public class SolicitudController {
 //    }
 
     @GetMapping("/{id}")
-    public SolicitudResponse obtenerSolicitudDetallada(@PathVariable UUID id){
+    public SolicitudResponse obtenerSolicitudDetallada(@PathVariable Long id){
         return solicitudService.obtenerSolicitudId(id);
     }
 

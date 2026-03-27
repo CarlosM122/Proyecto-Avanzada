@@ -13,7 +13,7 @@ public abstract class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    private Long id;
 
     private String nombre;
 

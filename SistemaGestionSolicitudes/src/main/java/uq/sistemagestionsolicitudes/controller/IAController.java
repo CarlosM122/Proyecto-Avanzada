@@ -23,7 +23,7 @@ public class IAController {
     private SolicitudRepository solicitudRepository;
 
     @GetMapping("/resumen/{solicitudId}")
-    public String generarResumen(@PathVariable UUID solicitudId) {
+    public String generarResumen(@PathVariable Long solicitudId) {
 
         Solicitud solicitud = solicitudRepository.findById(solicitudId)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));

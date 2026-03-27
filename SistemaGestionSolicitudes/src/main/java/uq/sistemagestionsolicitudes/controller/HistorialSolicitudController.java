@@ -27,7 +27,7 @@ public class HistorialSolicitudController {
     }
 
     @GetMapping("/{solicitudId}/historial")
-    public List<HistorialSolicitud> obtenerHistorial(@PathVariable UUID solicitudId) {
+    public List<HistorialSolicitud> obtenerHistorial(@PathVariable Long solicitudId) {
 
         Solicitud solicitud = solicitudRepository.findById(solicitudId)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
