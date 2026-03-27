@@ -54,7 +54,7 @@ public class SolicitudService {
         );
     }
 
-    public SolicitudResponse obtenerSolicitudId(UUID id) {
+    public SolicitudResponse obtenerSolicitudId(Long id) {
         Solicitud solicitud = solicitudRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrado"));
         return convertirDTO(solicitud);
     }

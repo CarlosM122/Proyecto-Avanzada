@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface SolicitudRepository extends JpaRepository<Solicitud, UUID> {
+public interface SolicitudRepository extends JpaRepository<Solicitud, Long> {
     List<Solicitud> findByEstado (Estado estado);
-    List<Solicitud> findBySolicitanteId(UUID solicitanteId);
+    List<Solicitud> findBySolicitanteId(Long solicitanteId);
 }

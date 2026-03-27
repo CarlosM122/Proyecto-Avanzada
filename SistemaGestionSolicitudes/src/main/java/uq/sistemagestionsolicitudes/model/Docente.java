@@ -12,6 +12,6 @@ public class Docente extends Usuario {
 
     @Override
     public String getRole() {
-        return "ROL_ESTUDIANTE";
+        return "ROL_DOCENTE";
     }
 }

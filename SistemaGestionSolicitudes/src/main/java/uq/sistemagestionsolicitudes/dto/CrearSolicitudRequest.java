@@ -20,5 +20,5 @@ public class CrearSolicitudRequest {
 
     private Date fechaRegistro;
 
-    private UUID uuidSolicitante;
+    private Long idSolicitante;
 }
