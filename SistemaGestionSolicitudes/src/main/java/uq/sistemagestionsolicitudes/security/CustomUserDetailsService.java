@@ -7,24 +7,28 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import uq.sistemagestionsolicitudes.exception.ResourceNotFoundException;
 import uq.sistemagestionsolicitudes.model.Usuario;
 import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
 
-@AllArgsConstructor
+@Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
+    public CustomUserDetailsService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
     @Override
-    public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByCorreo(email).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+    public UserDetails loadUserByUsername(String correo)
+            throws UsernameNotFoundException {
 
-        String rol = usuario.getRole();
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Usuario no encontrado"));
 
-        return User.builder()
-                .username(usuario.getNombre())
-                .password(usuario.getPassword())
-                .authorities(new SimpleGrantedAuthority(rol)).build();
+        return new CustomUserDetails(usuario);
     }
 }
