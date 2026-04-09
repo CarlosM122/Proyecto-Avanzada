@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uq.sistemagestionsolicitudes.dto.LoginRequest;
 import uq.sistemagestionsolicitudes.dto.LoginResponse;
 import uq.sistemagestionsolicitudes.dto.RegisterRequest;
-import uq.sistemagestionsolicitudes.dto.RegisterResponse;
 import uq.sistemagestionsolicitudes.model.Administrativo;
 import uq.sistemagestionsolicitudes.model.Docente;
 import uq.sistemagestionsolicitudes.model.Estudiante;
@@ -48,15 +47,15 @@ public class AuthService {
         switch (request.getRole()) {
 
             case "ESTUDIANTE":
-                usuario = new Estudiante();
+                usuario = crearEstudiante(request);
                 break;
 
             case "ADMINISTRATIVO":
-                usuario = new Administrativo();
+                usuario = crearAdministrativo(request);
                 break;
 
             case "DOCENTE":
-                usuario = new Docente();
+                usuario = crearDocente(request);;
                 break;
 
             default:
@@ -71,4 +70,31 @@ public class AuthService {
         usuarioRepository.save(usuario);
     }
 
+    private Usuario crearDocente(RegisterRequest request) {
+        Usuario usuario = new Docente(request.getTipoContrato());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setNombre(request.getNombre());
+        usuario.setTelefono(request.getTelefono());
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        return usuario;
+    }
+
+    private Usuario crearAdministrativo(RegisterRequest request) {
+        Usuario usuario = new Administrativo(request.getAreaEncargada());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setNombre(request.getNombre());
+        usuario.setTelefono(request.getTelefono());
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        return usuario;
+
+    }
+
+    private Usuario crearEstudiante(RegisterRequest request) {
+        Usuario usuario = new Estudiante(request.getSemestre());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setNombre(request.getNombre());
+        usuario.setTelefono(request.getTelefono());
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        return usuario;
+    }
 }

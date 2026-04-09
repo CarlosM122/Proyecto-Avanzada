@@ -12,6 +12,14 @@ public class Administrativo extends Usuario {
     @Enumerated(EnumType.STRING)
     private Area areaEncargada;
 
+    public Administrativo (Area areaEncargada){
+        this.areaEncargada=areaEncargada;
+    }
+
+    public Administrativo() {
+
+    }
+
     @Override
     public String getRole() {
         return "ROL_ADMINISTRATIVO";
