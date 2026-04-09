@@ -21,6 +21,8 @@ public abstract class Usuario {
 
     private String password;
 
+    private String telefono;
+
     @Transient
     public abstract String getRole();
 

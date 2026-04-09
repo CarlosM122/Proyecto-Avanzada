@@ -36,15 +36,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.csrf().disable();
+        http.csrf((csrf) -> csrf.disable());
 
-        http.authorizeHttpRequests()
-                .requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated();
+        http.authorizeHttpRequests((authorize) -> authorize
+                .requestMatchers("/auth/**").permitAll().anyRequest().authenticated()
+        );
 
-        http.exceptionHandling()
-                .authenticationEntryPoint(securityExceptionHandler())
-                .accessDeniedHandler(securityExceptionHandler());
+        http.exceptionHandling((exceptionHandling) -> exceptionHandling.
+                        authenticationEntryPoint(securityExceptionHandler()).accessDeniedHandler(securityExceptionHandler()));
 
         http.addFilterBefore(jwtAuthenticationFilter(),
                 UsernamePasswordAuthenticationFilter.class);

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uq.sistemagestionsolicitudes.dto.LoginRequest;
 import uq.sistemagestionsolicitudes.dto.LoginResponse;
+import uq.sistemagestionsolicitudes.dto.RegisterRequest;
+import uq.sistemagestionsolicitudes.dto.RegisterResponse;
 import uq.sistemagestionsolicitudes.service.AuthService;
 
 @RestController
@@ -23,5 +25,12 @@ public class AuthController {
             @RequestBody LoginRequest request) {
 
         return ResponseEntity.ok(authService.login(request));
+    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+
+        authService.register(request);
+
+        return ResponseEntity.ok("Usuario registrado correctamente");
     }
 }

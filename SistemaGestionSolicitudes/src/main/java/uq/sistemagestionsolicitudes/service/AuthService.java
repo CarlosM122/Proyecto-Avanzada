@@ -3,14 +3,24 @@ package uq.sistemagestionsolicitudes.service;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uq.sistemagestionsolicitudes.dto.LoginRequest;
 import uq.sistemagestionsolicitudes.dto.LoginResponse;
+import uq.sistemagestionsolicitudes.dto.RegisterRequest;
+import uq.sistemagestionsolicitudes.dto.RegisterResponse;
+import uq.sistemagestionsolicitudes.model.Administrativo;
+import uq.sistemagestionsolicitudes.model.Docente;
+import uq.sistemagestionsolicitudes.model.Estudiante;
+import uq.sistemagestionsolicitudes.model.Usuario;
+import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
 import uq.sistemagestionsolicitudes.security.JwtService;
 
 @Service
 @AllArgsConstructor
 public class AuthService {
+    private final PasswordEncoder passwordEncoder;
+    private final UsuarioRepository usuarioRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
@@ -27,4 +37,38 @@ public class AuthService {
 
         return new LoginResponse(token);
     }
+    public void register(RegisterRequest request) {
+
+        if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
+            throw new RuntimeException("El usuario ya existe");
+        }
+
+        Usuario usuario;
+
+        switch (request.getRole()) {
+
+            case "ESTUDIANTE":
+                usuario = new Estudiante();
+                break;
+
+            case "ADMINISTRATIVO":
+                usuario = new Administrativo();
+                break;
+
+            case "DOCENTE":
+                usuario = new Docente();
+                break;
+
+            default:
+                throw new RuntimeException("Rol no válido");
+        }
+
+        usuario.setCorreo(request.getCorreo());
+        usuario.setNombre(request.getNombre());
+        usuario.setTelefono(request.getTelefono());
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        usuarioRepository.save(usuario);
+    }
+
 }
