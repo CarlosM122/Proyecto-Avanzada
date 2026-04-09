@@ -9,7 +9,7 @@ import java.security.Key;
 import java.util.Date;
 @Service
 public class JwtService {
-    private final String SECRET_KEY = "mi_clave_super_secreta_1234";
+    private final String SECRET_KEY = "mi_clave_super_secreta_12345678901234567890";
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
