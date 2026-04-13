@@ -9,6 +9,7 @@ import uq.sistemagestionsolicitudes.dto.SolicitudResponse;
 import uq.sistemagestionsolicitudes.exception.AccessDeniedException;
 import uq.sistemagestionsolicitudes.exception.InvalidStateException;
 import uq.sistemagestionsolicitudes.exception.ResourceNotFoundException;
+import uq.sistemagestionsolicitudes.model.AccionSolicitud;
 import uq.sistemagestionsolicitudes.model.*;
 import uq.sistemagestionsolicitudes.repository.SolicitudRepository;
 import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class SolicitudService {
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
+    private final HistorialSolicitudService historialService;
 
     public SolicitudResponse crearSolicitud(CrearSolicitudRequest request) {
         Usuario solicitante = obtenerUsuarioAutenticado();
@@ -35,6 +37,11 @@ public class SolicitudService {
         solicitud.setSolicitante(solicitante);
 
         solicitudRepository.save(solicitud);
+        historialService.registrarCambio(
+                solicitud.getId(),
+                AccionSolicitud.REGISTRO
+        );
+
         return convertirDTO(solicitud);
 
     }
@@ -59,8 +66,20 @@ public class SolicitudService {
         return convertirDTO(solicitud);
     }
 
-    public SolicitudResponse priorizarSolicitud(UUID id, Prioridad prioridad) {
-        return null;
+    public SolicitudResponse priorizarSolicitud(Long id, Prioridad prioridad) {
+
+        Solicitud solicitud = solicitudRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitud no encontrada"));
+
+        solicitud.setPrioridad(prioridad);
+        solicitudRepository.save(solicitud);
+
+        historialService.registrarCambio(
+                solicitud.getId(),
+                AccionSolicitud.PRIORIZACION
+        );
+
+        return convertirDTO(solicitud);
     }
 
     private Usuario obtenerUsuarioAutenticado() {

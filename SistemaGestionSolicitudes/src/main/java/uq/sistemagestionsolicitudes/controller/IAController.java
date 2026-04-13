@@ -1,35 +1,25 @@
 package uq.sistemagestionsolicitudes.controller;
 
-import uq.sistemagestionsolicitudes.model.Solicitud;
-import uq.sistemagestionsolicitudes.repository.SolicitudRepository;
-import uq.sistemagestionsolicitudes.service.HistorialSolicitudService;
+import uq.sistemagestionsolicitudes.dto.ResumenIAResponse;
+import uq.sistemagestionsolicitudes.dto.SugerenciaIAResponse;
 import uq.sistemagestionsolicitudes.service.IAService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/api/ia")
+@RequestMapping("/ia")
 public class IAController {
-
-    @Autowired
-    private HistorialSolicitudService historialService;
 
     @Autowired
     private IAService iaService;
 
-    @Autowired
-    private SolicitudRepository solicitudRepository;
+    @PostMapping("/clasificar")
+    public SugerenciaIAResponse clasificar(@RequestBody String descripcion) {
+        return iaService.sugerirClasificacion(descripcion);
+    }
 
-    @GetMapping("/resumen/{solicitudId}")
-    public String generarResumen(@PathVariable Long solicitudId) {
-
-        Solicitud solicitud = solicitudRepository.findById(solicitudId)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
-
-        return iaService.generarResumen(
-                historialService.obtenerHistorial(solicitud)
-        );
+    @GetMapping("/resumen/{id}")
+    public ResumenIAResponse resumen(@PathVariable Long id) {
+        return iaService.generarResumen(id);
     }
 }

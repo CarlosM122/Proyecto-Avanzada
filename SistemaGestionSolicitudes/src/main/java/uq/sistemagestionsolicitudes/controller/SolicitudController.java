@@ -45,7 +45,7 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/prioridad")
     @PreAuthorize("hasAuthority('ROL_ADMINISTRATIVO')")
-    public SolicitudResponse priorizarSolicitudRequest(@PathVariable UUID id,@RequestBody Prioridad prioridad){
+    public SolicitudResponse priorizarSolicitudRequest(@PathVariable Long id,@RequestBody Prioridad prioridad){
         return solicitudService.priorizarSolicitud(id,prioridad);
     }
 }
