@@ -11,5 +11,4 @@ public class SugerenciaIAResponse {
     private String prioridad;
     private double confianza;
     private String explicacion;
-
 }
