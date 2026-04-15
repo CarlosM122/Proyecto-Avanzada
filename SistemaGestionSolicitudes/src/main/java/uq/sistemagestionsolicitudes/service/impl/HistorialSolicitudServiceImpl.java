@@ -1,4 +1,4 @@
-package uq.sistemagestionsolicitudes.service;
+package uq.sistemagestionsolicitudes.service.impl;
 
 import uq.sistemagestionsolicitudes.model.HistorialSolicitud;
 import uq.sistemagestionsolicitudes.model.Solicitud;
@@ -7,6 +7,7 @@ import uq.sistemagestionsolicitudes.repository.HistorialSolicitudRepository;
 import uq.sistemagestionsolicitudes.repository.SolicitudRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uq.sistemagestionsolicitudes.service.HistorialSolicitudService;
 
 import java.time.LocalDateTime;
 
