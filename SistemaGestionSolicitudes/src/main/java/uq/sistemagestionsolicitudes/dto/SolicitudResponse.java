@@ -6,8 +6,10 @@ import lombok.Setter;
 import uq.sistemagestionsolicitudes.model.Estado;
 import uq.sistemagestionsolicitudes.model.Prioridad;
 import uq.sistemagestionsolicitudes.model.TipoSolicitud;
+import uq.sistemagestionsolicitudes.model.Usuario;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Getter @Setter
 @AllArgsConstructor
 public class SolicitudResponse {
@@ -22,5 +24,9 @@ public class SolicitudResponse {
 
     private TipoSolicitud tipoSolicitud;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
+
+    private String justificacionPrioridad;
+
+    private Usuario responsable;
 }

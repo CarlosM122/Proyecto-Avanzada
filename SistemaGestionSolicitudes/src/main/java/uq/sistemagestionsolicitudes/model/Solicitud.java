@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -19,6 +20,8 @@ public class Solicitud {
     @Enumerated(EnumType.STRING)
     private Prioridad prioridad;
 
+    private String justificacion_prioridad;
+
     @Enumerated(EnumType.STRING)
     private TipoSolicitud tipoSolicitud;
 
@@ -28,7 +31,7 @@ public class Solicitud {
     @Enumerated(EnumType.STRING)
     private OrigenSolicitud origen;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
 
     private String descripcion;
 
@@ -43,7 +46,7 @@ public class Solicitud {
     @PrePersist
     public void prePersist() {
         if (this.fecha == null) {
-            this.fecha = LocalDate.now();
+            this.fecha = LocalDateTime.now();
         }
         if (this.estado == null) {
             this.estado=Estado.REGISTRADA;

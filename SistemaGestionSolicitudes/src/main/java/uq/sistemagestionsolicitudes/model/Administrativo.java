@@ -11,9 +11,11 @@ public class Administrativo extends Usuario {
 
     @Enumerated(EnumType.STRING)
     private Area areaEncargada;
+    private TipoContrato tipoContrato;
 
-    public Administrativo (Area areaEncargada){
+    public Administrativo (Area areaEncargada, TipoContrato tipoContrato) {
         this.areaEncargada=areaEncargada;
+        this.tipoContrato=tipoContrato;
     }
 
     public Administrativo() {

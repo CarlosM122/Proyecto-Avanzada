@@ -8,9 +8,9 @@ import lombok.*;
 @DiscriminatorValue("DOCENTE")
 public class Docente extends Usuario {
 
-    private String tipoContrato;
+    private TipoContrato tipoContrato;
 
-    public Docente(String tipoContrato) {
+    public Docente(TipoContrato tipoContrato) {
         this.tipoContrato=tipoContrato;
     }
 

@@ -1,13 +1,12 @@
 package uq.sistemagestionsolicitudes.dto;
 
+import lombok.Data;
+import uq.sistemagestionsolicitudes.model.TipoContrato;
+
+@Data
 public class RegisterResponse {
+
     private String correo;
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public RegisterResponse(String correo) {
-        this.correo = correo;
-    }
+    private TipoContrato contrato;
+    private String token;
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uq.sistemagestionsolicitudes.dto.LoginRequest;
 import uq.sistemagestionsolicitudes.dto.LoginResponse;
 import uq.sistemagestionsolicitudes.dto.RegisterRequest;
+import uq.sistemagestionsolicitudes.dto.RegisterResponse;
 import uq.sistemagestionsolicitudes.model.Administrativo;
 import uq.sistemagestionsolicitudes.model.Docente;
 import uq.sistemagestionsolicitudes.model.Estudiante;
@@ -36,7 +37,7 @@ public class AuthService {
 
         return new LoginResponse(token);
     }
-    public void register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
 
         if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
             throw new RuntimeException("El usuario ya existe");
@@ -66,8 +67,14 @@ public class AuthService {
         usuario.setNombre(request.getNombre());
         usuario.setTelefono(request.getTelefono());
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        String token = jwtService.generateToken(request.getCorreo());
 
         usuarioRepository.save(usuario);
+        RegisterResponse registerResponse = new RegisterResponse();
+        registerResponse.setContrato(request.getTipoContrato());
+        registerResponse.setCorreo(request.getCorreo());
+        registerResponse.setToken(token);
+        return registerResponse;
     }
 
     private Usuario crearDocente(RegisterRequest request) {
@@ -80,7 +87,7 @@ public class AuthService {
     }
 
     private Usuario crearAdministrativo(RegisterRequest request) {
-        Usuario usuario = new Administrativo(request.getAreaEncargada());
+        Usuario usuario = new Administrativo(request.getAreaEncargada(),request.getTipoContrato());
         usuario.setCorreo(request.getCorreo());
         usuario.setNombre(request.getNombre());
         usuario.setTelefono(request.getTelefono());

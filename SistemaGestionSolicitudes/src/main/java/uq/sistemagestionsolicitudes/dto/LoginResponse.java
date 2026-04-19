@@ -1,5 +1,8 @@
 package uq.sistemagestionsolicitudes.dto;
 
+import lombok.Data;
+
+@Data
 public class LoginResponse {
     private String token;
 
@@ -7,7 +10,4 @@ public class LoginResponse {
         this.token = token;
     }
 
-    public String getToken() {
-        return token;
-    }
 }
