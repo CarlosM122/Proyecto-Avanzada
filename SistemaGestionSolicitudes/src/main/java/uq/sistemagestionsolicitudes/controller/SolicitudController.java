@@ -2,6 +2,8 @@ package uq.sistemagestionsolicitudes.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uq.sistemagestionsolicitudes.dto.ClasificacionRequest;
@@ -10,7 +12,6 @@ import uq.sistemagestionsolicitudes.dto.SolicitudResponse;
 import uq.sistemagestionsolicitudes.model.Estado;
 import uq.sistemagestionsolicitudes.model.Prioridad;
 import uq.sistemagestionsolicitudes.model.TipoSolicitud;
-import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
 import uq.sistemagestionsolicitudes.service.SolicitudService;
 
 import java.util.List;
@@ -29,14 +30,14 @@ public class SolicitudController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROL_ESTUDIANTE')")
+    @PreAuthorize("hasAnyAuthority('ROL_ESTUDIANTE', 'ROL_ADMINISTRATIVO', 'ROL_DOCENTE')")
     public SolicitudResponse obtenerSolicitudDetallada(@PathVariable Long id) {
         return solicitudService.obtenerSolicitudId(id);
     }
 
     @GetMapping
-    public List<SolicitudResponse> obtenerSolicitudes() {
-        return solicitudService.obtenerSolicitudes();
+    public Page<SolicitudResponse> obtenerSolicitudes(Pageable pageable) {
+        return solicitudService.obtenerSolicitudes(pageable);
     }
 
     @PatchMapping("/{id}/clasificar")
@@ -54,7 +55,7 @@ public class SolicitudController {
     @PatchMapping("/{id}/asignacion")
     @PreAuthorize("hasAuthority('ROL_ADMINISTRATIVO')")
     public SolicitudResponse asignarResponsable(@PathVariable Long id, @RequestBody Long responsableId) {
-        return solicitudService.aignarResponsable(id, responsableId);
+        return solicitudService.asignarResponsable(id, responsableId);
     }
 
     @GetMapping("/{id}/asignacion")
@@ -66,7 +67,7 @@ public class SolicitudController {
     @PatchMapping("/{id}/atender")
     @PreAuthorize("hasAnyAuthority('ROL_ADMINISTRATIVO','ROL_DOCENTE')")
     public SolicitudResponse atenderSolicitudRequest(@PathVariable Long id, @RequestBody String anotacion) {
-        return solicitudService.atenderSolcitud(id, anotacion);
+        return solicitudService.atenderSolicitud(id, anotacion);
     }
 
     @GetMapping("/{id}/atender")
