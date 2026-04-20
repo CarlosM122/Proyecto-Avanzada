@@ -25,18 +25,16 @@ public class AuthService {
     private final JwtService jwtService;
 
     public LoginResponse login(LoginRequest request) {
-
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getCorreo(),
                         request.getPassword()
                 )
         );
-
         String token = jwtService.generateToken(request.getCorreo());
-
         return new LoginResponse(token);
     }
+
     public RegisterResponse register(RegisterRequest request) {
 
         if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
@@ -46,30 +44,31 @@ public class AuthService {
         Usuario usuario;
 
         switch (request.getRole()) {
-
             case "ESTUDIANTE":
                 usuario = crearEstudiante(request);
                 break;
-
             case "ADMINISTRATIVO":
                 usuario = crearAdministrativo(request);
                 break;
-
             case "DOCENTE":
-                usuario = crearDocente(request);;
+                usuario = crearDocente(request);
                 break;
-
             default:
                 throw new RuntimeException("Rol no válido");
         }
 
+
         usuario.setCorreo(request.getCorreo());
         usuario.setNombre(request.getNombre());
         usuario.setTelefono(request.getTelefono());
+
+
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-        String token = jwtService.generateToken(request.getCorreo());
 
         usuarioRepository.save(usuario);
+
+        String token = jwtService.generateToken(request.getCorreo());
+
         RegisterResponse registerResponse = new RegisterResponse();
         registerResponse.setContrato(request.getTipoContrato());
         registerResponse.setCorreo(request.getCorreo());
@@ -77,31 +76,15 @@ public class AuthService {
         return registerResponse;
     }
 
-    private Usuario crearDocente(RegisterRequest request) {
-        Usuario usuario = new Docente(request.getTipoContrato());
-        usuario.setCorreo(request.getCorreo());
-        usuario.setNombre(request.getNombre());
-        usuario.setTelefono(request.getTelefono());
-        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-        return usuario;
+    private Usuario crearEstudiante(RegisterRequest request) {
+        return new Estudiante(request.getSemestre());
     }
 
     private Usuario crearAdministrativo(RegisterRequest request) {
-        Usuario usuario = new Administrativo(request.getAreaEncargada(),request.getTipoContrato());
-        usuario.setCorreo(request.getCorreo());
-        usuario.setNombre(request.getNombre());
-        usuario.setTelefono(request.getTelefono());
-        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-        return usuario;
-
+        return new Administrativo(request.getAreaEncargada(), request.getTipoContrato());
     }
 
-    private Usuario crearEstudiante(RegisterRequest request) {
-        Usuario usuario = new Estudiante(request.getSemestre());
-        usuario.setCorreo(request.getCorreo());
-        usuario.setNombre(request.getNombre());
-        usuario.setTelefono(request.getTelefono());
-        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-        return usuario;
+    private Usuario crearDocente(RegisterRequest request) {
+        return new Docente(request.getTipoContrato());
     }
 }

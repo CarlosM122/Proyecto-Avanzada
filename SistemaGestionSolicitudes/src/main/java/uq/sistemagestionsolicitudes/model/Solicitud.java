@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -20,7 +19,7 @@ public class Solicitud {
     @Enumerated(EnumType.STRING)
     private Prioridad prioridad;
 
-    private String justificacion_prioridad;
+    private String justificacionPrioridad;
 
     @Enumerated(EnumType.STRING)
     private TipoSolicitud tipoSolicitud;

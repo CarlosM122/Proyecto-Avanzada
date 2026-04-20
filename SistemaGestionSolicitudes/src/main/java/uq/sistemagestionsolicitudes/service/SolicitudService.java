@@ -1,6 +1,8 @@
 package uq.sistemagestionsolicitudes.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,7 @@ public class SolicitudService {
         solicitud.setOrigen(request.getOrigen());
         solicitud.setFecha(request.getFechaRegistro().atStartOfDay());
         solicitud.setPrioridad(Prioridad.valueOf(prioridad[0]));
-        solicitud.setJustificacion_prioridad(prioridad[1]);
+        solicitud.setJustificacionPrioridad(prioridad[1]);
 
         solicitud.setSolicitante(obtenerUsuarioAutenticado());
 
@@ -77,18 +79,21 @@ public class SolicitudService {
         return prioridad;
     }
 
-    public List<SolicitudResponse> obtenerSolicitudes() {
+    public Page<SolicitudResponse> obtenerSolicitudes(Pageable pageable) {
         Usuario solicitante = obtenerUsuarioAutenticado();
-        List<Solicitud> solicitudList = solicitudRepository.findBySolicitanteId(solicitante.getId());
-        return solicitudList.stream()
-                .map(this::convertirDTO)
-                .toList();
+        if (solicitante.getRole().equalsIgnoreCase("ROL_ESTUDIANTE")) {
+            return solicitudRepository.findBySolicitanteId(solicitante.getId(), pageable)
+                    .map(this::convertirDTO);
+        } else {
+            return solicitudRepository.findAll(pageable)
+                    .map(this::convertirDTO);
+        }
     }
 
     public SolicitudResponse clasificarSolicitud(Long id, ClasificacionRequest request) {
         Solicitud solicitud = encontrarSolicitud(id);
         solicitud.setPrioridad(request.getPrioridad());
-        solicitud.setJustificacion_prioridad(request.getJustificacion());
+        solicitud.setJustificacionPrioridad(request.getJustificacion());
         solicitud.setEstado(cambiarEstado(Estado.CLASIFICADA, solicitud.getEstado()));
         Solicitud solicitudGuardada = solicitudRepository.save(solicitud);
 
@@ -101,7 +106,7 @@ public class SolicitudService {
         return convertirDTO(solicitud);
     }
 
-    public SolicitudResponse aignarResponsable(Long id, Long responsableId) {
+    public SolicitudResponse asignarResponsable(Long id, Long responsableId) {
         Solicitud solicitud = encontrarSolicitud(id);
         Usuario responsable = usuarioRepository.findById(responsableId).
                 orElseThrow(()-> new ResourceNotFoundException("Usuario no encontrado"));
@@ -118,7 +123,7 @@ public class SolicitudService {
         return convertirDTO(solicitud);
     }
 
-    public SolicitudResponse atenderSolcitud(Long id, String anotacion) {
+    public SolicitudResponse atenderSolicitud(Long id, String anotacion) {
         Solicitud solicitud = encontrarSolicitud(id);
         solicitud.setEstado(cambiarEstado(Estado.ATENDIDA, solicitud.getEstado()));
         Solicitud solicitudGuardada = solicitudRepository.save(solicitud);
@@ -160,12 +165,21 @@ public class SolicitudService {
     private SolicitudResponse convertirDTO(Solicitud solicitud) {
         return new SolicitudResponse(
                 solicitud.getId(), solicitud.getDescripcion(), solicitud.getEstado(), solicitud.getPrioridad(),
-                solicitud.getTipoSolicitud(), solicitud.getFecha(), solicitud.getJustificacion_prioridad(), solicitud.getResponsable()
+                solicitud.getTipoSolicitud(), solicitud.getFecha(), solicitud.getJustificacionPrioridad(), solicitud.getResponsable()
         );
     }
 
     public SolicitudResponse obtenerSolicitudId(Long id) {
-        return convertirDTO(encontrarSolicitud(id));
+        Solicitud solicitud = encontrarSolicitud(id);
+        Usuario usuario = obtenerUsuarioAutenticado();
+        if (usuario.getRole().equalsIgnoreCase("ROL_ESTUDIANTE")){
+            if (solicitud.getSolicitante().getId().equals(usuario.getId())) {
+                return convertirDTO(solicitud);
+            }else {
+                throw new AccessDeniedException("No tiene acceso a esta solicitud.");
+            }
+        }
+        return convertirDTO(solicitud);
     }
 
     private Solicitud encontrarSolicitud(Long solicitudId) {
@@ -193,7 +207,7 @@ public class SolicitudService {
                 nuevoEstado = Estado.CERRADA;
             }
         }
-        if (estado == null){
+        if (nuevoEstado == null){
             throw new InvalidStateException("La acción no corresponde a el estado de la solicitud, estado actual:"
                     + solicitudEstado);
         }
