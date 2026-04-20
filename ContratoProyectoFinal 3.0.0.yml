@@ -1,0 +1,345 @@
+openapi: 3.0.3
+info:
+  title: API Gestión de Solicitudes Académicas
+  description: >
+    API REST para la gestión integral del ciclo de vida de solicitudes
+    académicas del Programa de Ingeniería.
+    Permite registro, clasificación, priorización, asignación,
+    seguimiento, cierre e integración opcional con IA.
+  version: 2.0.0
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Auth
+  - name: Solicitudes
+  - name: Historial
+  - name: IA
+
+paths:
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Usuario registrado
+        '400':
+          description: Error en registro
+
+  /solicitudes:
+    post:
+      tags: [Solicitudes]
+      summary: Crear solicitud
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudRequest'
+      responses:
+        '200':
+          description: Solicitud creada
+
+    get:
+      tags: [Solicitudes]
+      summary: Listar solicitudes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de solicitudes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SolicitudResponse'
+
+  /solicitudes/{id}:
+    get:
+      tags: [Solicitudes]
+      summary: Obtener solicitud por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Solicitud encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '404':
+          description: No encontrada
+
+  /solicitudes/{id}/clasificar:
+    patch:
+      tags: [Solicitudes]
+      summary: Clasificar solicitud
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "ALTA"
+      responses:
+        '200':
+          description: Clasificada
+
+  /solicitudes/{id}/asignacion:
+    patch:
+      tags: [Solicitudes]
+      summary: Asignar responsable
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: integer
+              example: 5
+      responses:
+        '200':
+          description: Responsable asignado
+
+  /solicitudes/{id}/atender:
+    patch:
+      tags: [Solicitudes]
+      summary: Marcar como atendida
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "Se resolvió la solicitud"
+      responses:
+        '200':
+          description: Solicitud atendida
+
+  /solicitudes/{id}/cerrar:
+    post:
+      tags: [Solicitudes]
+      summary: Cerrar solicitud
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "Solicitud finalizada"
+      responses:
+        '200':
+          description: Solicitud cerrada
+
+  /solicitudes/buscar:
+    get:
+      tags: [Solicitudes]
+      summary: Buscar solicitudes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            type: string
+        - name: tipo
+          in: query
+          schema:
+            type: string
+        - name: prioridad
+          in: query
+          schema:
+            type: string
+        - name: responsableId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Resultados de búsqueda
+
+  /historial/{solicitudId}:
+    get:
+      tags: [Historial]
+      summary: Obtener historial
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: solicitudId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Historial encontrado
+
+  /ia/clasificar:
+    post:
+      tags: [IA]
+      summary: Sugerir clasificación
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "Necesito cancelar una materia"
+      responses:
+        '200':
+          description: Sugerencia generada
+
+  /ia/resumen/{id}:
+    get:
+      tags: [IA]
+      summary: Generar resumen
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Resumen generado
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    LoginRequest:
+      type: object
+      properties:
+        correo:
+          type: string
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    RegisterRequest:
+      type: object
+      properties:
+        correo:
+          type: string
+        password:
+          type: string
+        nombre:
+          type: string
+        rol:
+          type: string
+        telefono:
+          type: string
+        semestre:
+          type: integer
+        tipoContrato:
+          type: string
+        areaEncargada:
+          type: string
+
+    SolicitudRequest:
+      type: object
+      properties:
+        tipo:
+          type: string
+        descripcion:
+          type: string
+        canal:
+          type: string
+
+    SolicitudResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        tipo:
+          type: string
+        estado:
+          type: string
+        prioridad:
+          type: string
+        descripcion:
+          type: string
