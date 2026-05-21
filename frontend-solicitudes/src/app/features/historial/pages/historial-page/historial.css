@@ -1,10 +1,90 @@
-.card{
-  border:1px solid #ccc;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:8px;
+.historial-container{
+
+    width:80%;
+    margin:auto;
+    padding:30px;
+
 }
 
-h2{
-  margin-bottom:20px;
+h1{
+
+    margin-bottom:5px;
+    color:#1e293b;
+
+}
+
+.subtitulo{
+
+    color:#64748b;
+    margin-bottom:30px;
+
+}
+
+.card{
+
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+
+    box-shadow:
+    0 4px 12px rgba(0,0,0,.1);
+
+    transition:.3s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.card-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:15px;
+
+}
+
+.fecha{
+
+    color:#64748b;
+    font-size:14px;
+
+}
+
+.accion{
+
+    background:#2563eb;
+    color:white;
+
+    padding:8px 15px;
+    border-radius:20px;
+
+    font-size:14px;
+
+}
+
+.card-body{
+
+    color:#334155;
+    line-height:1.5;
+
+}
+
+.sin-datos{
+
+    text-align:center;
+    margin-top:50px;
+
+    padding:40px;
+
+    background:#f8fafc;
+
+    border-radius:15px;
+
 }

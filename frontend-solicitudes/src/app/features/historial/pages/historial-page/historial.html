@@ -1,34 +1,54 @@
-<h2>Historial de solicitud</h2>
+<div class="historial-container">
 
-@if(historial.length > 0){
+    <h1>Historial de Solicitudes</h1>
+    <p class="subtitulo">
+        Seguimiento de cambios realizados en la solicitud
+    </p>
 
-  @for(item of historial; track item.id){
+    @if(historial.length > 0){
 
-    <div class="card">
+        @for(item of historial; track item.id){
 
-      <p>
-        <b>Fecha:</b>
-        {{item.fecha}}
-      </p>
+            <div class="card">
 
-      <p>
-        <b>Acción:</b>
-        {{item.accion}}
-      </p>
+                <div class="card-header">
 
-      <p>
-        <b>Descripción:</b>
-        {{item.descripcion}}
-      </p>
+                    <span class="fecha">
+                        {{item.fecha}}
+                    </span>
 
-    </div>
+                    <span class="accion">
+                        {{item.accion}}
+                    </span>
 
-  }
+                </div>
 
-}
+                <div class="card-body">
 
-@else{
+                    <p>
+                        {{item.descripcion}}
+                    </p>
 
-  <p>No hay historial disponible</p>
+                </div>
 
-}
+            </div>
+
+        }
+
+    }
+
+    @else {
+
+        <div class="sin-datos">
+
+            <h3>No hay historial disponible</h3>
+
+            <p>
+                La solicitud aún no tiene movimientos registrados
+            </p>
+
+        </div>
+
+    }
+
+</div>

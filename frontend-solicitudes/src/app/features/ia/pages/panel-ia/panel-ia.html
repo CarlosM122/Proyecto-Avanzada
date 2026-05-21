@@ -1,42 +1,50 @@
-<h2>Panel IA</h2>
+<div class="ia-container">
 
-<textarea
-  [(ngModel)]="descripcion"
-  placeholder="Ingrese descripción de la solicitud">
-</textarea>
+    <h1>Asistente IA</h1>
 
-<br><br>
+    <p class="subtitulo">
+        Analiza automáticamente solicitudes
+    </p>
 
-<button (click)="analizar()">
-  Analizar
-</button>
+    <textarea
+    [(ngModel)]="descripcion"
+    placeholder="Escriba la descripción">
+    </textarea>
 
-@if(resultado){
+    <button (click)="analizar()">
 
-<div>
+        Analizar solicitud
 
-  <h3>Resultado</h3>
+    </button>
 
-  <p>
-    <b>Categoría:</b>
-    {{resultado.categoria}}
-  </p>
+    @if(resultado){
 
-  <p>
-    <b>Prioridad:</b>
-    {{resultado.prioridad}}
-  </p>
+        <div class="resultado">
 
-  <p>
-    <b>Confianza:</b>
-    {{resultado.confianza}}
-  </p>
+            <h3>Resultado IA</h3>
 
-  <p>
-    <b>Explicación:</b>
-    {{resultado.explicacion}}
-  </p>
+            <p>
+                <strong>Categoría:</strong>
+                {{resultado.categoria}}
+            </p>
+
+            <p>
+                <strong>Prioridad:</strong>
+                {{resultado.prioridad}}
+            </p>
+
+            <p>
+                <strong>Confianza:</strong>
+                {{resultado.confianza}}
+            </p>
+
+            <p>
+                <strong>Explicación:</strong>
+                {{resultado.explicacion}}
+            </p>
+
+        </div>
+
+    }
 
 </div>
-
-}
