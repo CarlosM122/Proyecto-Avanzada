@@ -1,0 +1,41 @@
+<h2>Panel IA</h2>
+
+<textarea
+[(ngModel)]="descripcion"
+placeholder="Ingrese descripción">
+</textarea>
+
+<br><br>
+
+<button (click)="analizar()">
+
+Analizar
+
+</button>
+
+@if(resultado){
+
+<div>
+
+<p>
+Categoría:
+{{resultado.categoria}}
+</p>
+
+<p>
+Prioridad:
+{{resultado.prioridad}}
+</p>
+
+<p>
+Confianza:
+{{resultado.confianza}}
+</p>
+
+<p>
+{{resultado.explicacion}}
+</p>
+
+</div>
+
+}
