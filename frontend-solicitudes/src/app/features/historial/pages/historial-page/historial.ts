@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { HistorialService } from '../../services/historial.service';
 import { Historial } from '../../models/historial';
@@ -6,7 +7,7 @@ import { Historial } from '../../models/historial';
 @Component({
   selector:'app-historial',
   standalone:true,
-  imports:[],
+  imports:[CommonModule],
   templateUrl:'./historial.html',
   styleUrl:'./historial.css'
 })
@@ -26,15 +27,12 @@ export class HistorialComponent implements OnInit{
     this.historialService
     .obtenerHistorial(this.idSolicitud)
     .subscribe({
-
       next:(data)=>{
         this.historial=data;
       },
-
       error:(err)=>{
         console.log(err);
       }
-
     });
 
   }

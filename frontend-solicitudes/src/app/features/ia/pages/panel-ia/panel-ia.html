@@ -1,40 +1,41 @@
 <h2>Panel IA</h2>
 
 <textarea
-[(ngModel)]="descripcion"
-placeholder="Ingrese descripción">
+  [(ngModel)]="descripcion"
+  placeholder="Ingrese descripción de la solicitud">
 </textarea>
 
 <br><br>
 
 <button (click)="analizar()">
-
-Analizar
-
+  Analizar
 </button>
 
 @if(resultado){
 
 <div>
 
-<p>
-Categoría:
-{{resultado.categoria}}
-</p>
+  <h3>Resultado</h3>
 
-<p>
-Prioridad:
-{{resultado.prioridad}}
-</p>
+  <p>
+    <b>Categoría:</b>
+    {{resultado.categoria}}
+  </p>
 
-<p>
-Confianza:
-{{resultado.confianza}}
-</p>
+  <p>
+    <b>Prioridad:</b>
+    {{resultado.prioridad}}
+  </p>
 
-<p>
-{{resultado.explicacion}}
-</p>
+  <p>
+    <b>Confianza:</b>
+    {{resultado.confianza}}
+  </p>
+
+  <p>
+    <b>Explicación:</b>
+    {{resultado.explicacion}}
+  </p>
 
 </div>
 

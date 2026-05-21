@@ -1,34 +1,34 @@
 <h2>Historial de solicitud</h2>
 
-@if(historial.length>0){
+@if(historial.length > 0){
 
-@for(item of historial; track item.id){
+  @for(item of historial; track item.id){
 
-<div class="card">
+    <div class="card">
 
-<p>
-<b>Fecha:</b>
-{{item.fecha}}
-</p>
+      <p>
+        <b>Fecha:</b>
+        {{item.fecha}}
+      </p>
 
-<p>
-<b>Acción:</b>
-{{item.accion}}
-</p>
+      <p>
+        <b>Acción:</b>
+        {{item.accion}}
+      </p>
 
-<p>
-<b>Descripción:</b>
-{{item.descripcion}}
-</p>
+      <p>
+        <b>Descripción:</b>
+        {{item.descripcion}}
+      </p>
 
-</div>
+    </div>
 
-}
+  }
 
 }
 
 @else{
 
-<p>No hay historial disponible</p>
+  <p>No hay historial disponible</p>
 
 }
