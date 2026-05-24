@@ -65,16 +65,16 @@ public class SolicitudService {
                 tipoSolicitud.equalsIgnoreCase("SOLICITUD_CUPOS")){
             prioridad[0] = "ALTA";
             prioridad[1] = "Se clasifica con prioridad alta, ya que se debe resolver en un plazo no mayor a 5 dias desde el" +
-                    "registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(5);
+                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(5);
         } else if (tipoSolicitud.equalsIgnoreCase("CANCELACION_ASIGNATURAS")||
                 tipoSolicitud.equalsIgnoreCase("HOMOLOGACION")) {
             prioridad[0] = "MEDIA";
             prioridad[1] = "Se clasifica con prioridad media, ya que se debe resolver en un plazo no mayor a 10 dias desde el" +
-                    "registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(10);
+                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(10);
         } else {
             prioridad[0] = "BAJA";
             prioridad[1] = "Se clasifica con prioridad baja, ya que se debe resolver en un plazo no mayor a 15 dias desde el" +
-                    "registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(15);
+                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(15);
         }
         return prioridad;
     }
