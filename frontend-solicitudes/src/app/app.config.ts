@@ -1,9 +1,4 @@
-import {
-  ApplicationConfig,
-  provideBrowserGlobalErrorListeners,
-  provideClientHydration,
-  withEventReplay
-} from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 
 import { provideRouter } from '@angular/router';
 
@@ -15,15 +10,9 @@ export const appConfig: ApplicationConfig = {
 
   providers: [
 
-    provideBrowserGlobalErrorListeners(),
-
     provideRouter(routes),
 
-    provideHttpClient(),
-
-    provideClientHydration(
-      withEventReplay()
-    )
+    provideHttpClient()
 
   ]
 
