@@ -28,6 +28,9 @@ export class HistorialComponent implements OnInit{
     .obtenerHistorial(this.idSolicitud)
     .subscribe({
       next:(data)=>{
+        console.log("Historial recibido:");
+        console.log(data);
+            
         this.historial=data;
       },
       error:(err)=>{
@@ -36,5 +39,4 @@ export class HistorialComponent implements OnInit{
     });
 
   }
-
 }

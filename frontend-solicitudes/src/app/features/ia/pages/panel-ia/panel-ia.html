@@ -1,50 +1,122 @@
-<div class="ia-container">
+<div class="container">
 
-    <h1>Asistente IA</h1>
+    <div class="sidebar">
 
-    <p class="subtitulo">
-        Analiza automáticamente solicitudes
-    </p>
+        <div class="logo">
 
-    <textarea
-    [(ngModel)]="descripcion"
-    placeholder="Escriba la descripción">
-    </textarea>
+            <h1>GESTOR</h1>
+            <h1>SOLICITUDES</h1>
 
-    <button (click)="analizar()">
+        </div>
 
-        Analizar solicitud
+    </div>
 
-    </button>
 
-    @if(resultado){
+    <div class="contenido">
 
-        <div class="resultado">
+        <div class="header">
 
-            <h3>Resultado IA</h3>
+            <h1>Asistente Inteligente</h1>
 
             <p>
-                <strong>Categoría:</strong>
-                {{resultado.categoria}}
-            </p>
-
-            <p>
-                <strong>Prioridad:</strong>
-                {{resultado.prioridad}}
-            </p>
-
-            <p>
-                <strong>Confianza:</strong>
-                {{resultado.confianza}}
-            </p>
-
-            <p>
-                <strong>Explicación:</strong>
-                {{resultado.explicacion}}
+                Analiza automáticamente solicitudes y genera sugerencias
             </p>
 
         </div>
 
-    }
+
+        <div class="panel">
+
+            <label>
+
+                Descripción de la solicitud
+
+            </label>
+
+            <textarea
+            [(ngModel)]="descripcion"
+            placeholder="Escriba aquí la descripción de la solicitud">
+            </textarea>
+
+            <button (click)="analizar()">
+
+                Analizar solicitud
+
+            </button>
+
+        </div>
+
+
+        @if(resultado){
+
+        <h2 class="titulo-seccion">
+
+            IA
+
+        </h2>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>Categoría</h3>
+
+                <p>
+
+                    {{resultado.categoria}}
+
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>Prioridad</h3>
+
+                <p>
+
+                    {{resultado.prioridad}}
+
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>Confianza</h3>
+
+                <p>
+
+                    {{resultado.confianza}}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="resultado">
+
+            <h2>
+
+                Resultado IA
+
+            </h2>
+
+            <p>
+
+                {{resultado.explicacion}}
+
+            </p>
+
+        </div>
+
+        }
+
+    </div>
 
 </div>

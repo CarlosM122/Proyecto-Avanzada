@@ -1,6 +1,15 @@
 export interface Historial{
-  id:number;
-  fecha:string;
-  accion:string;
-  descripcion:string;
+
+    id:number;
+
+    accion:string;
+
+    fecha:string;
+
+    observacion:string;
+
+    solicitud?:any;
+
+    usuarioResponsable?:any;
+
 }

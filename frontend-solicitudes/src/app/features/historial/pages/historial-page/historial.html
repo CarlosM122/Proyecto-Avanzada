@@ -1,54 +1,85 @@
-<div class="historial-container">
+<div class="container">
 
-    <h1>Historial de Solicitudes</h1>
-    <p class="subtitulo">
-        Seguimiento de cambios realizados en la solicitud
-    </p>
+    <div class="sidebar">
 
-    @if(historial.length > 0){
+        <div class="logo">
 
-        @for(item of historial; track item.id){
+            <h1>GESTOR</h1>
+            <h1>SOLICITUDES</h1>
 
-            <div class="card">
+        </div>
 
-                <div class="card-header">
+    </div>
 
-                    <span class="fecha">
-                        {{item.fecha}}
-                    </span>
 
-                    <span class="accion">
-                        {{item.accion}}
-                    </span>
+    <div class="contenido">
 
-                </div>
+        <div class="header">
 
-                <div class="card-body">
+            <h1>Historial de Solicitudes</h1>
+
+            <p>
+                Seguimiento de cambios realizados en las solicitudes
+            </p>
+
+        </div>
+
+
+        <h2 class="titulo-seccion">
+
+            HISTORIAL
+
+        </h2>
+
+
+        @if(historial.length>0){
+
+            <div class="cards">
+
+            @for(item of historial; track item.id){
+
+                <div class="card">
+
+                    <h3>{{item.accion}}</h3>
 
                     <p>
-                        {{item.descripcion}}
+
+                        <strong>Fecha:</strong>
+                        {{item.fecha}}
+
+                    </p>
+
+                    <p>
+
+                        <strong>Observación:</strong>
+                        {{item.observacion}}
+
                     </p>
 
                 </div>
+
+            }
 
             </div>
 
         }
 
-    }
-
-    @else {
+        @else{
 
         <div class="sin-datos">
 
-            <h3>No hay historial disponible</h3>
+            <h2>
+                No hay historial disponible
+            </h2>
 
             <p>
-                La solicitud aún no tiene movimientos registrados
+                Aún no existen movimientos registrados
             </p>
 
         </div>
 
-    }
+        }
+
+    </div>
 
 </div>

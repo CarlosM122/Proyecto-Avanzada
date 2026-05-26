@@ -1,90 +1,156 @@
-.historial-container{
+*{
 
-    width:80%;
-    margin:auto;
-    padding:30px;
-
-}
-
-h1{
-
-    margin-bottom:5px;
-    color:#1e293b;
+margin:0;
+padding:0;
+box-sizing:border-box;
 
 }
 
-.subtitulo{
+body{
 
-    color:#64748b;
-    margin-bottom:30px;
+background:#f5f7fb;
+
+}
+
+.container{
+
+display:flex;
+min-height:100vh;
+
+}
+
+.sidebar{
+
+width:230px;
+
+background:#2563eb;
+
+color:white;
+
+padding-top:40px;
+
+padding-left:20px;
+
+box-shadow:
+5px 0px 15px rgba(0,0,0,.1);
+
+}
+
+.logo h1{
+
+margin:0;
+
+font-size:28px;
+
+font-weight:bold;
+
+line-height:1.2;
+
+}
+
+.contenido{
+
+flex:1;
+
+padding:50px;
+
+}
+
+.header{
+
+text-align:center;
+
+margin-bottom:35px;
+
+}
+
+.header h1{
+
+color:#1e293b;
+
+margin-bottom:10px;
+
+}
+
+.header p{
+
+color:#64748b;
+
+}
+
+.titulo-seccion{
+
+margin-bottom:25px;
+
+text-align:center;
+
+color:#2563eb;
+
+}
+
+.cards{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(300px,1fr));
+
+gap:20px;
 
 }
 
 .card{
 
-    background:white;
-    border-radius:15px;
-    padding:20px;
-    margin-bottom:20px;
+background:white;
 
-    box-shadow:
-    0 4px 12px rgba(0,0,0,.1);
+padding:25px;
 
-    transition:.3s;
+border-radius:15px;
+
+border-top:5px solid #2563eb;
+
+box-shadow:
+0 5px 20px rgba(0,0,0,.08);
+
+transition:.3s;
 
 }
 
 .card:hover{
 
-    transform:translateY(-5px);
+transform:translateY(-5px);
 
 }
 
-.card-header{
+.card h3{
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+margin-bottom:15px;
 
-    margin-bottom:15px;
+color:#2563eb;
 
 }
 
-.fecha{
+.card p{
 
-    color:#64748b;
-    font-size:14px;
+margin-bottom:10px;
 
-}
-
-.accion{
-
-    background:#2563eb;
-    color:white;
-
-    padding:8px 15px;
-    border-radius:20px;
-
-    font-size:14px;
-
-}
-
-.card-body{
-
-    color:#334155;
-    line-height:1.5;
+color:#475569;
 
 }
 
 .sin-datos{
 
-    text-align:center;
-    margin-top:50px;
+background:white;
 
-    padding:40px;
+padding:30px;
 
-    background:#f8fafc;
+border-left:8px solid #2563eb;
 
-    border-radius:15px;
+border-radius:15px;
+
+text-align:center;
+
+box-shadow:
+0 5px 20px rgba(0,0,0,.08);
 
 }

@@ -9,7 +9,7 @@ import { ResumenIA } from '../models/resumen-ia';
 })
 export class IaService {
 
-  private api="http://localhost:8080/ia";
+  private api="http://localhost:8081/ia";
 
   constructor(private http:HttpClient){}
 
