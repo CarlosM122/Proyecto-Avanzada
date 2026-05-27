@@ -3,6 +3,7 @@ package uq.sistemagestionsolicitudes.service;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uq.sistemagestionsolicitudes.dto.LoginRequest;
@@ -14,6 +15,7 @@ import uq.sistemagestionsolicitudes.model.Docente;
 import uq.sistemagestionsolicitudes.model.Estudiante;
 import uq.sistemagestionsolicitudes.model.Usuario;
 import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
+import uq.sistemagestionsolicitudes.security.CustomUserDetails;
 import uq.sistemagestionsolicitudes.security.JwtService;
 
 @Service
@@ -25,13 +27,16 @@ public class AuthService {
     private final JwtService jwtService;
 
     public LoginResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getCorreo(),
                         request.getPassword()
                 )
         );
-        String token = jwtService.generateToken(request.getCorreo());
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        assert customUserDetails != null;
+        Usuario usuario = customUserDetails.getUsuario();
+        String token = jwtService.generateToken(usuario);
         return new LoginResponse(token);
     }
 
@@ -67,7 +72,7 @@ public class AuthService {
 
         usuarioRepository.save(usuario);
 
-        String token = jwtService.generateToken(request.getCorreo());
+        String token = jwtService.generateToken(usuario);
 
         RegisterResponse registerResponse = new RegisterResponse();
         registerResponse.setContrato(request.getTipoContrato());

@@ -6,6 +6,7 @@ import uq.sistemagestionsolicitudes.model.OrigenSolicitud;
 import uq.sistemagestionsolicitudes.model.TipoSolicitud;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,7 +18,7 @@ public class SolicitudRequest {
 
     private OrigenSolicitud origen;
 
-    private LocalDate fechaRegistro;
+    private LocalDateTime fechaRegistro;
 
     private Long idSolicitante;
 }

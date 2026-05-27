@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+import uq.sistemagestionsolicitudes.model.Usuario;
 
 import java.security.Key;
 import java.util.Date;
@@ -15,12 +16,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String correo) {
+    public String generateToken(Usuario usuario) {
 
         return Jwts.builder()
-                .setSubject(correo)
+                .setSubject(usuario.getCorreo())
+                .claim("role",usuario.getRole())
+                .claim("nombre",usuario.getNombre())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hora
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

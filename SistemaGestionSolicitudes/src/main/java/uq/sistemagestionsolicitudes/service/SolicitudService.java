@@ -19,6 +19,8 @@ import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
 import uq.sistemagestionsolicitudes.repository.specification.SolicitudSpecification;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -30,7 +32,7 @@ public class SolicitudService {
     private final HistorialSolicitudService historialService;
 
     public SolicitudResponse crearSolicitud(SolicitudRequest request) {
-        request.setFechaRegistro(LocalDate.now());
+        request.setFechaRegistro(LocalDateTime.now());
         String [] prioridad = calcularPrioridad(request);
         Solicitud solicitud = new Solicitud();
 
@@ -38,7 +40,7 @@ public class SolicitudService {
         solicitud.setDescripcion(request.getDescripcion());
         solicitud.setTipoSolicitud(request.getTipoSolicitud());
         solicitud.setOrigen(request.getOrigen());
-        solicitud.setFecha(request.getFechaRegistro().atStartOfDay());
+        solicitud.setFecha(request.getFechaRegistro());
         solicitud.setPrioridad(Prioridad.valueOf(prioridad[0]));
         solicitud.setJustificacionPrioridad(prioridad[1]);
 
@@ -59,22 +61,26 @@ public class SolicitudService {
 
     private String [] calcularPrioridad(SolicitudRequest request) {
         String [] prioridad = new String[2];
-        LocalDate fecha = request.getFechaRegistro();
+        LocalDateTime fecha = request.getFechaRegistro();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String tipoSolicitud= request.getTipoSolicitud().toString();
         if (tipoSolicitud.equalsIgnoreCase("REGISTRO_ASIGNATURAS")||
                 tipoSolicitud.equalsIgnoreCase("SOLICITUD_CUPOS")){
+            LocalDateTime fechaMaxima = fecha.plusDays(5);
             prioridad[0] = "ALTA";
             prioridad[1] = "Se clasifica con prioridad alta, ya que se debe resolver en un plazo no mayor a 5 dias desde el" +
-                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(5);
+                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fechaMaxima.format(formatter);
         } else if (tipoSolicitud.equalsIgnoreCase("CANCELACION_ASIGNATURAS")||
                 tipoSolicitud.equalsIgnoreCase("HOMOLOGACION")) {
+            LocalDateTime fechaMaxima = fecha.plusDays(10);
             prioridad[0] = "MEDIA";
             prioridad[1] = "Se clasifica con prioridad media, ya que se debe resolver en un plazo no mayor a 10 dias desde el" +
-                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(10);
+                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fechaMaxima.format(formatter);
         } else {
+            LocalDateTime fechaMaxima = fecha.plusDays(15);
             prioridad[0] = "BAJA";
             prioridad[1] = "Se clasifica con prioridad baja, ya que se debe resolver en un plazo no mayor a 15 dias desde el" +
-                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fecha.plusDays(15);
+                    " registro de la solicitud. La fecha maxima para resolver esta solicitud es: " + fechaMaxima.format(formatter);
         }
         return prioridad;
     }
@@ -164,7 +170,7 @@ public class SolicitudService {
 
     private SolicitudResponse convertirDTO(Solicitud solicitud) {
         return new SolicitudResponse(
-                solicitud.getId(), solicitud.getDescripcion(), solicitud.getEstado(), solicitud.getPrioridad(),
+                solicitud.getId(), solicitud.getSolicitante(), solicitud.getDescripcion(), solicitud.getEstado(), solicitud.getPrioridad(),
                 solicitud.getTipoSolicitud(), solicitud.getFecha(), solicitud.getJustificacionPrioridad(), solicitud.getResponsable()
         );
     }

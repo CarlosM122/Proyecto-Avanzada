@@ -16,6 +16,8 @@ public class SolicitudResponse {
 
     private Long id;
 
+    private Usuario solicitante;
+
     private String descripcion;
 
     private Estado estado;
