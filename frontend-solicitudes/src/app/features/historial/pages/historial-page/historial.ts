@@ -27,16 +27,24 @@ export class HistorialComponent implements OnInit{
     this.historialService
     .obtenerHistorial(this.idSolicitud)
     .subscribe({
+
       next:(data)=>{
-        console.log("Historial recibido:");
-        console.log(data);
-            
-        this.historial=data;
+
+        this.historial = [...data];
+
       },
+
       error:(err)=>{
-        console.log(err);
+
+        console.error(
+          "Error al cargar historial:",
+          err
+        );
+
       }
+
     });
 
   }
+
 }

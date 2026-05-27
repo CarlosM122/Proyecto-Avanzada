@@ -11,7 +11,6 @@
 
     </div>
 
-
     <div class="contenido">
 
         <div class="header">
@@ -24,61 +23,71 @@
 
         </div>
 
-
         <h2 class="titulo-seccion">
 
             HISTORIAL
 
         </h2>
 
+        <div *ngIf="cargando">
 
-        @if(historial.length>0){
-
-            <div class="cards">
-
-            @for(item of historial; track item.id){
-
-                <div class="card">
-
-                    <h3>{{item.accion}}</h3>
-
-                    <p>
-
-                        <strong>Fecha:</strong>
-                        {{item.fecha}}
-
-                    </p>
-
-                    <p>
-
-                        <strong>Observación:</strong>
-                        {{item.observacion}}
-
-                    </p>
-
-                </div>
-
-            }
-
-            </div>
-
-        }
-
-        @else{
-
-        <div class="sin-datos">
-
-            <h2>
-                No hay historial disponible
-            </h2>
-
-            <p>
-                Aún no existen movimientos registrados
-            </p>
+            <h3>
+                Cargando historial...
+            </h3>
 
         </div>
 
-        }
+
+        <div
+        class="cards"
+        *ngIf="!cargando && historial.length > 0">
+
+            <div
+            class="card"
+            *ngFor="let item of historial">
+
+                <h3>
+
+                    {{item.accion}}
+
+                </h3>
+
+                <p>
+
+                    <strong>Fecha:</strong>
+                    {{item.fecha}}
+
+                </p>
+
+                <p>
+
+                    <strong>Observación:</strong>
+                    {{item.observacion}}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+        class="sin-datos"
+        *ngIf="!cargando && historial.length===0">
+
+            <h2>
+
+                No hay historial disponible
+
+            </h2>
+
+            <p>
+
+                Aún no existen movimientos registrados
+
+            </p>
+
+        </div>
 
     </div>
 
