@@ -1,0 +1,5353 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.editorconfig
+.gitignore
+.prettierrc
+angular.json
+package.json
+public/favicon.ico
+README.md
+src/app/app.config.ts
+src/app/app.css
+src/app/app.html
+src/app/app.routes.ts
+src/app/app.spec.ts
+src/app/app.ts
+src/app/core/guards/auth-guard.spec.ts
+src/app/core/guards/auth-guard.ts
+src/app/core/interceptors/auth.interceptor.ts
+src/app/core/models/auth.model.ts
+src/app/core/models/historial.ts
+src/app/core/models/ia.model.ts
+src/app/core/models/solicitud.model.ts
+src/app/core/models/usuario.model.ts
+src/app/core/services/auth.service.ts
+src/app/core/services/historial.service.ts
+src/app/core/services/ia.service.ts
+src/app/core/services/solicitud.service.ts
+src/app/core/services/usuario.service.ts
+src/app/features/auth/login/login.css
+src/app/features/auth/login/login.html
+src/app/features/auth/login/login.spec.ts
+src/app/features/auth/login/login.ts
+src/app/features/auth/register/register.css
+src/app/features/auth/register/register.html
+src/app/features/auth/register/register.spec.ts
+src/app/features/auth/register/register.ts
+src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.css
+src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.html
+src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.spec.ts
+src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.ts
+src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.css
+src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.html
+src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.spec.ts
+src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.ts
+src/index.html
+src/main.ts
+src/styles.css
+tsconfig.app.json
+tsconfig.json
+tsconfig.spec.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/app/core/guards/auth-guard.spec.ts">
+import { TestBed } from '@angular/core/testing';
+import { CanActivateFn } from '@angular/router';
+
+import { authGuard } from './auth-guard';
+
+describe('authGuard', () => {
+  const executeGuard: CanActivateFn = (...guardParameters) =>
+    TestBed.runInInjectionContext(() => authGuard(...guardParameters));
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+  });
+
+  it('should be created', () => {
+    expect(executeGuard).toBeTruthy();
+  });
+});
+</file>
+
+<file path="src/app/core/guards/auth-guard.ts">
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+export const authGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isLoggedIn()) {
+    return true;
+  }
+
+  router.navigate(['/login']);
+  return false;
+};
+</file>
+
+<file path="src/app/core/interceptors/auth.interceptor.ts">
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthService).token();
+
+  if (!token) return next(req);
+
+  const cloned = req.clone({
+    setHeaders: { Authorization: `Bearer ${token}` },
+  });
+
+  return next(cloned);
+};
+</file>
+
+<file path="src/app/core/models/auth.model.ts">
+export interface LoginRequest {
+  correo: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+}
+
+export interface RegisterRequest {
+  correo: string;
+  password: string;
+  nombre: string;
+  role: 'ESTUDIANTE' | 'ADMINISTRATIVO' | 'DOCENTE';
+  semestre?: number; // solo Estudiante
+  tipoContrato?: 'PLANTA' | 'CATEDRATICO'; // Docente/Administrativo
+  areaEncargada?: string; // solo Administrativo
+}
+</file>
+
+<file path="src/app/core/models/historial.ts">
+export interface Historial {
+  id: number;
+  accion: string;
+  fecha: string;
+}
+</file>
+
+<file path="src/app/core/models/ia.model.ts">
+export interface SugerenciaIA {
+  categoria: string;
+  prioridad: string;
+  confianza: number;
+  explicacion: string;
+}
+
+export interface ResumenIA {
+  resumen: string;
+  generadoPor: string;
+}
+</file>
+
+<file path="src/app/core/models/solicitud.model.ts">
+import { Usuario } from './usuario.model';
+
+export type Estado = 'REGISTRADA' | 'CLASIFICADA' | 'EN_ATENCION' | 'ATENDIDA' | 'CERRADA';
+export type Prioridad = 'ALTA' | 'MEDIA' | 'BAJA';
+export type TipoSolicitud =
+  | 'REGISTRO_ASIGNATURAS'
+  | 'HOMOLOGACION'
+  | 'CANCELACION_ASIGNATURAS'
+  | 'SOLICITUD_CUPOS'
+  | 'CONSULTA_ACADEMICA';
+export type OrigenSolicitud = 'CSU' | 'PRESENCIAL' | 'CORREO' | 'SAC' | 'TELEFONICO';
+
+export interface Solicitud {
+  id: number;
+  solicitante: Usuario;
+  descripcion: string;
+  estado: Estado;
+  prioridad: Prioridad;
+  tipoSolicitud: TipoSolicitud;
+  fecha: string;
+  justificacionPrioridad: string;
+  responsable?: Usuario;
+}
+
+export interface SolicitudRequest {
+  descripcion: string;
+  tipoSolicitud: TipoSolicitud;
+  origen: OrigenSolicitud;
+  idSolicitante?: number;
+}
+
+export interface ClasificacionRequest {
+  prioridad: Prioridad;
+  justificacion: string;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+</file>
+
+<file path="src/app/core/models/usuario.model.ts">
+export interface Usuario {
+  id: number;
+  nombre: string;
+  correo: string;
+  telefono?: string;
+}
+
+export interface UsuarioResumen {
+  id: number;
+  nombre: string;
+  correo: string;
+  role: string;
+}
+</file>
+
+<file path="src/app/core/services/auth.service.ts">
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
+import { LoginRequest, LoginResponse, RegisterRequest } from '../models/auth.model';
+
+const TOKEN_KEY = 'jwt_token';
+const API = 'http://localhost:8081';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+
+  readonly isLoggedIn = computed(() => !!this._token());
+  readonly token = this._token.asReadonly();
+
+  constructor(private http: HttpClient) {}
+
+  login(body: LoginRequest) {
+    return this.http
+      .post<LoginResponse>(`${API}/auth/login`, body)
+      .pipe(tap((res) => this.saveToken(res.token)));
+  }
+
+  register(body: RegisterRequest) {
+    return this.http
+      .post<LoginResponse>(`${API}/auth/register`, body)
+      .pipe(tap((res) => this.saveToken(res.token)));
+  }
+
+  logout() {
+    localStorage.removeItem(TOKEN_KEY);
+    this._token.set(null);
+  }
+
+  getRole(): string | null {
+    const t = this._token();
+    if (!t) return null;
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1]));
+      return payload.role ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private saveToken(token: string) {
+    localStorage.setItem(TOKEN_KEY, token);
+    this._token.set(token);
+  }
+
+  crearUsuario(body: any) {
+    return this.http.post(`${API}/usuarios/crear`, body, { responseType: 'text' });
+  }
+}
+</file>
+
+<file path="src/app/core/services/historial.service.ts">
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Historial } from '../models/historial';
+
+const API = 'http://localhost:8081';
+
+@Injectable({ providedIn: 'root' })
+export class HistorialService {
+  private http = inject(HttpClient);
+
+  obtener(solicitudId: number) {
+    return this.http.get<Historial[]>(`${API}/historial/${solicitudId}`);
+  }
+}
+</file>
+
+<file path="src/app/core/services/ia.service.ts">
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { SugerenciaIA, ResumenIA } from '../models/ia.model';
+
+const API = 'http://localhost:8081';
+
+@Injectable({ providedIn: 'root' })
+export class IaService {
+  private http = inject(HttpClient);
+
+  clasificar(descripcion: string) {
+    return this.http.post<SugerenciaIA>(`${API}/ia/clasificar`, descripcion, {
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
+
+  resumen(id: number) {
+    return this.http.get<ResumenIA>(`${API}/ia/resumen/${id}`);
+  }
+}
+</file>
+
+<file path="src/app/core/services/solicitud.service.ts">
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+  Solicitud,
+  SolicitudRequest,
+  ClasificacionRequest,
+  Page,
+  Estado,
+  TipoSolicitud,
+  Prioridad,
+} from '../models/solicitud.model';
+
+const API = 'http://localhost:8081';
+
+@Injectable({ providedIn: 'root' })
+export class SolicitudService {
+  constructor(private http: HttpClient) {}
+
+  listar(page = 0, size = 10) {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Page<Solicitud>>(`${API}/solicitudes`, { params });
+  }
+
+  obtener(id: number) {
+    return this.http.get<Solicitud>(`${API}/solicitudes/${id}`);
+  }
+
+  crear(body: SolicitudRequest) {
+    return this.http.post<Solicitud>(`${API}/solicitudes`, body);
+  }
+
+  clasificar(id: number, body: ClasificacionRequest) {
+    return this.http.patch<Solicitud>(`${API}/solicitudes/${id}/clasificar`, body);
+  }
+
+  asignarResponsable(id: number, responsableId: number) {
+    return this.http.patch<Solicitud>(`${API}/solicitudes/${id}/asignacion`, responsableId);
+  }
+
+  atender(id: number, anotacion: string) {
+    return this.http.patch<Solicitud>(`${API}/solicitudes/${id}/atender`, anotacion);
+  }
+
+  cerrar(id: number, anotacion: string) {
+    return this.http.post<Solicitud>(`${API}/solicitudes/${id}/cerrar`, anotacion);
+  }
+
+  buscar(filtros: {
+    estado?: Estado;
+    tipo?: TipoSolicitud;
+    prioridad?: Prioridad;
+    responsableId?: number;
+  }) {
+    let params = new HttpParams();
+    if (filtros.estado) params = params.set('estado', filtros.estado);
+    if (filtros.tipo) params = params.set('tipo', filtros.tipo);
+    if (filtros.prioridad) params = params.set('prioridad', filtros.prioridad);
+    if (filtros.responsableId) params = params.set('responsableId', filtros.responsableId);
+    return this.http.get<Solicitud[]>(`${API}/solicitudes/buscar`, { params });
+  }
+}
+</file>
+
+<file path="src/app/core/services/usuario.service.ts">
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { UsuarioResumen } from '../models/usuario.model';
+
+const API = 'http://localhost:8081';
+
+@Injectable({ providedIn: 'root' })
+export class UsuarioService {
+  private http = inject(HttpClient);
+
+  obtenerResponsables() {
+    return this.http.get<UsuarioResumen[]>(`${API}/usuarios/responsables`);
+  }
+}
+</file>
+
+<file path="src/app/features/auth/login/login.css">
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Variables ── */
+:host {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --accent: #6ee7b7;
+  --accent-dim: rgba(110, 231, 183, 0.12);
+  --accent-glow: rgba(110, 231, 183, 0.3);
+  --text-primary: #f0f0f5;
+  --text-secondary: #8888a0;
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.08);
+}
+
+/* ── Layout ── */
+.login-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  overflow-y: auto;
+  padding: 24px 16px;
+}
+
+/* ── Backdrop ── */
+.login-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(110, 231, 183, 0.2), transparent 70%);
+  top: -100px;
+  right: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2), transparent 70%);
+  bottom: -80px;
+  left: -80px;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+/* ── Card ── */
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  margin: 24px auto;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 32px 64px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(110, 231, 183, 0.05);
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Header ── */
+.card-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+}
+
+.brand-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
+.divider-line {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+
+/* ── Form ── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.field-input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+  outline: none;
+}
+
+.field-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.field-input:focus {
+  border-color: var(--accent);
+  background: rgba(110, 231, 183, 0.04);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.field-input:focus + .input-icon,
+.input-wrapper:focus-within .input-icon {
+  color: var(--accent);
+}
+
+.input-error {
+  border-color: var(--error) !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15) !important;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: var(--error);
+  padding-left: 2px;
+}
+
+/* ── Alert ── */
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 10px;
+  color: var(--error);
+  font-size: 13px;
+}
+
+.alert-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(248, 113, 113, 0.2);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Button ── */
+.btn-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #0a0a0f;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+  margin-top: 4px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.btn-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-arrow {
+  transition: transform 0.2s;
+}
+
+.btn-submit:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(10, 10, 15, 0.3);
+  border-top-color: #0a0a0f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.login-link a {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.login-link a:hover {
+  opacity: 0.8;
+}
+</file>
+
+<file path="src/app/features/auth/login/login.html">
+<div class="login-wrapper">
+  <div class="login-backdrop">
+    <div class="grid-lines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="login-card">
+    <div class="card-header">
+      <div class="logo-mark">
+        <span class="logo-icon">⬡</span>
+      </div>
+      <h1 class="brand">SGS</h1>
+      <p class="brand-sub">Sistema de Gestión de Solicitudes</p>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="field-group">
+        <label class="field-label" for="correo">Correo institucional</label>
+        <div class="input-wrapper">
+          <span class="input-icon">@</span>
+          <input
+            id="correo"
+            type="email"
+            formControlName="correo"
+            class="field-input"
+            placeholder="usuario@universidad.edu.co"
+            [class.input-error]="correo.touched && correo.invalid"
+          />
+        </div>
+        @if (correo.touched && correo.hasError('required')) {
+          <span class="error-msg">El correo es obligatorio</span>
+        }
+        @if (correo.touched && correo.hasError('email')) {
+          <span class="error-msg">Ingresa un correo válido</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="password">Contraseña</label>
+        <div class="input-wrapper">
+          <span class="input-icon">◈</span>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="field-input"
+            placeholder="••••••••"
+            [class.input-error]="password.touched && password.invalid"
+          />
+        </div>
+        @if (password.touched && password.hasError('required')) {
+          <span class="error-msg">La contraseña es obligatoria</span>
+        }
+        @if (password.touched && password.hasError('minlength')) {
+          <span class="error-msg">Mínimo 6 caracteres</span>
+        }
+      </div>
+
+      @if (errorMsg) {
+        <div class="alert-error">
+          <span class="alert-icon">!</span>
+          <span>{{ errorMsg }}</span>
+        </div>
+      }
+
+      <button type="submit" class="btn-submit" [disabled]="loading" [class.btn-loading]="loading">
+        @if (loading) {
+          <span class="spinner"></span>
+          <span>Verificando...</span>
+        } @else {
+          <span>Ingresar</span>
+          <span class="btn-arrow">→</span>
+        }
+      </button>
+      <p class="login-link">
+        ¿No tienes cuenta?
+        <a (click)="irRegister()">Regístrate</a>
+      </p>
+    </form>
+  </div>
+</div>
+</file>
+
+<file path="src/app/features/auth/login/login.spec.ts">
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { Login } from './login';
+
+describe('Login', () => {
+  let component: Login;
+  let fixture: ComponentFixture<Login>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Login],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Login);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+</file>
+
+<file path="src/app/features/auth/login/login.ts">
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
+
+@Component({
+  selector: 'app-login',
+  imports: [ReactiveFormsModule],
+  templateUrl: './login.html',
+  styleUrl: './login.css',
+  styles: ``,
+})
+export class Login {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  form: FormGroup = this.fb.group({
+    correo: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(4)]],
+  });
+
+  loading = false;
+  errorMsg = '';
+
+  onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.loading = true;
+    this.errorMsg = '';
+
+    this.authService.login(this.form.value).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/solicitudes']);
+      },
+      error: (err) => {
+        if (err.status === 0) {
+          this.loading = false;
+          this.errorMsg =
+            'No se pudo conectar al servidor. Por favor, verifica tu conexión e inténtalo de nuevo.';
+        } else if (err.status === 401) {
+          this.loading = false;
+          this.errorMsg = 'Correo o contraseña incorrectos. Por favor, inténtalo de nuevo.';
+        } else {
+          this.loading = false;
+          this.errorMsg = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.';
+        }
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  get correo() {
+    return this.form.get('correo')!;
+  }
+
+  get password() {
+    return this.form.get('password')!;
+  }
+
+  irRegister() {
+    this.router.navigate(['/register']);
+  }
+}
+</file>
+
+<file path="src/app/features/auth/register/register.css">
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:host {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --accent: #6ee7b7;
+  --accent-dim: rgba(110, 231, 183, 0.12);
+  --accent-glow: rgba(110, 231, 183, 0.3);
+  --text-primary: #f0f0f5;
+  --text-secondary: #8888a0;
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.08);
+}
+
+.login-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  overflow-y: auto;
+}
+
+.login-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(110, 231, 183, 0.2), transparent 70%);
+  top: -100px;
+  right: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2), transparent 70%);
+  bottom: -80px;
+  left: -80px;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  margin: 24px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 32px 64px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(110, 231, 183, 0.05);
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+}
+
+.brand-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+.divider-line {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.optional {
+  font-size: 11px;
+  color: rgba(136, 136, 160, 0.6);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.field-input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+  outline: none;
+}
+
+.field-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.field-input:focus {
+  border-color: var(--accent);
+  background: rgba(110, 231, 183, 0.04);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.field-input::-webkit-outer-spin-button,
+.field-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.input-error {
+  border-color: var(--error) !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15) !important;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: var(--error);
+  padding-left: 2px;
+}
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 10px;
+  color: var(--error);
+  font-size: 13px;
+}
+
+.alert-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(248, 113, 113, 0.2);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.btn-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #0a0a0f;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+  margin-top: 4px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-arrow {
+  transition: transform 0.2s;
+}
+.btn-submit:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(10, 10, 15, 0.3);
+  border-top-color: #0a0a0f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.login-link a {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.login-link a:hover {
+  opacity: 0.8;
+}
+</file>
+
+<file path="src/app/features/auth/register/register.html">
+<div class="login-wrapper">
+  <div class="login-backdrop">
+    <div class="grid-lines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="login-card">
+    <div class="card-header">
+      <div class="logo-mark">
+        <span class="logo-icon">⬡</span>
+      </div>
+      <h1 class="brand">SGS</h1>
+      <p class="brand-sub">Crear cuenta de estudiante</p>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="field-group">
+        <label class="field-label" for="nombre">Nombre completo</label>
+        <div class="input-wrapper">
+          <span class="input-icon">◈</span>
+          <input
+            id="nombre"
+            type="text"
+            formControlName="nombre"
+            class="field-input"
+            placeholder="Tu nombre completo"
+            [class.input-error]="nombre.touched && nombre.invalid"
+          />
+        </div>
+        @if (nombre.touched && nombre.hasError('required')) {
+          <span class="error-msg">El nombre es obligatorio</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="correo">Correo institucional</label>
+        <div class="input-wrapper">
+          <span class="input-icon">@</span>
+          <input
+            id="correo"
+            type="email"
+            formControlName="correo"
+            class="field-input"
+            placeholder="usuario@universidad.edu.co"
+            [class.input-error]="correo.touched && correo.invalid"
+          />
+        </div>
+        @if (correo.touched && correo.hasError('required')) {
+          <span class="error-msg">El correo es obligatorio</span>
+        }
+        @if (correo.touched && correo.hasError('email')) {
+          <span class="error-msg">Ingresa un correo válido</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="password">Contraseña</label>
+        <div class="input-wrapper">
+          <span class="input-icon">◈</span>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="field-input"
+            placeholder="••••••••"
+            [class.input-error]="password.touched && password.invalid"
+          />
+        </div>
+        @if (password.touched && password.hasError('required')) {
+          <span class="error-msg">La contraseña es obligatoria</span>
+        }
+        @if (password.touched && password.hasError('minlength')) {
+          <span class="error-msg">Mínimo 6 caracteres</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="semestre">Semestre</label>
+        <div class="input-wrapper">
+          <span class="input-icon">#</span>
+          <input
+            id="semestre"
+            type="number"
+            formControlName="semestre"
+            class="field-input"
+            placeholder="Ej: 4"
+            min="1"
+            max="10"
+            [class.input-error]="semestre.touched && semestre.invalid"
+          />
+        </div>
+        @if (semestre.touched && semestre.hasError('required')) {
+          <span class="error-msg">El semestre es obligatorio</span>
+        }
+        @if (
+          (semestre.touched && semestre.hasError('min')) ||
+          (semestre.touched && semestre.hasError('max'))
+        ) {
+          <span class="error-msg">El semestre debe estar entre 1 y 10</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="telefono"
+          >Teléfono <span class="optional">(opcional)</span></label
+        >
+        <div class="input-wrapper">
+          <span class="input-icon">✆</span>
+          <input
+            id="telefono"
+            type="tel"
+            formControlName="telefono"
+            class="field-input"
+            placeholder="3001234567"
+          />
+        </div>
+      </div>
+
+      @if (errorMsg) {
+        <div class="alert-error">
+          <span class="alert-icon">!</span>
+          <span>{{ errorMsg }}</span>
+        </div>
+      }
+
+      <button type="submit" class="btn-submit" [disabled]="loading" [class.btn-loading]="loading">
+        @if (loading) {
+          <span class="spinner"></span>
+          <span>Creando cuenta...</span>
+        } @else {
+          <span>Crear cuenta</span>
+          <span class="btn-arrow">→</span>
+        }
+      </button>
+
+      <p class="login-link">
+        ¿Ya tienes cuenta?
+        <a (click)="irLogin()">Inicia sesión</a>
+      </p>
+    </form>
+  </div>
+</div>
+</file>
+
+<file path="src/app/features/auth/register/register.spec.ts">
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { Register } from './register';
+
+describe('Register', () => {
+  let component: Register;
+  let fixture: ComponentFixture<Register>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Register],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Register);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+</file>
+
+<file path="src/app/features/auth/register/register.ts">
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-register',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  templateUrl: './register.html',
+  styleUrl: './register.css',
+})
+export class Register {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  form: FormGroup = this.fb.group({
+    nombre: ['', Validators.required],
+    correo: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    semestre: [null, [Validators.required, Validators.min(1), Validators.max(10)]],
+    telefono: [''],
+  });
+
+  loading = false;
+  errorMsg = '';
+
+  onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.loading = true;
+    this.errorMsg = '';
+
+    const body = {
+      ...this.form.value,
+      role: 'ESTUDIANTE',
+    };
+
+    this.authService.register(body).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/solicitudes']);
+      },
+      error: (err) => {
+        this.loading = false;
+
+        if (err.status === 0) {
+          this.errorMsg = 'No se pudo conectar al servidor.';
+        } else if (err.status === 400) {
+          this.errorMsg = 'El correo ya está registrado.';
+        } else {
+          this.errorMsg = 'Ocurrió un error inesperado. Intenta de nuevo.';
+        }
+
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  irLogin() {
+    this.router.navigate(['/login']);
+  }
+
+  get nombre() {
+    return this.form.get('nombre')!;
+  }
+  get correo() {
+    return this.form.get('correo')!;
+  }
+  get password() {
+    return this.form.get('password')!;
+  }
+  get semestre() {
+    return this.form.get('semestre')!;
+  }
+}
+</file>
+
+<file path="src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.css">
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ─────────────────────────────
+   RESET & HOST
+───────────────────────────── */
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --surface-2: #141422;
+
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.13);
+
+  --accent: #6ee7b7;
+  --accent-dim: rgba(110, 231, 183, 0.1);
+  --accent-glow: rgba(110, 231, 183, 0.25);
+
+  --blue: #818cf8;
+  --blue-dim: rgba(129, 140, 248, 0.1);
+
+  --amber: #fbbf24;
+  --amber-dim: rgba(251, 191, 36, 0.1);
+
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.1);
+
+  --text-1: #eeeef5;
+  --text-2: #9090b0;
+  --text-3: #55556a;
+
+  --sidebar-w: 220px;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─────────────────────────────
+   LAYOUT
+───────────────────────────── */
+.detalle-wrapper {
+  display: flex;
+  height: 100vh;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-1);
+  overflow: hidden;
+}
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 0 8px;
+  margin-bottom: 36px;
+}
+
+.logo-hex {
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--text-1);
+}
+
+/* ── Nav ── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  color: var(--text-2);
+
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-1);
+}
+
+.nav-active {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  font-weight: 500;
+}
+
+.nav-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.nav-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-item-create {
+  margin-top: 8px;
+  color: var(--accent) !important;
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  background: var(--accent-dim);
+}
+
+.nav-item-create:hover {
+  background: rgba(110, 231, 183, 0.15) !important;
+}
+
+/* ── Footer ── */
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  flex: 1;
+  min-width: 0;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+
+  color: var(--accent);
+
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.btn-logout {
+  width: 32px;
+  height: 32px;
+
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  color: var(--text-3);
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+
+  flex-shrink: 0;
+}
+
+.btn-logout:hover {
+  background: var(--red-dim);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: var(--red);
+}
+
+/* ══════════════════════════════
+   MAIN
+══════════════════════════════ */
+.main-content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+/* ─────────────────────────────
+   TOPBAR
+───────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  padding: 24px 32px 0;
+
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 12px;
+
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  color: var(--text-2);
+
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+
+  cursor: pointer;
+
+  transition: all 0.15s;
+}
+
+.btn-back:hover {
+  border-color: var(--border-hover);
+  color: var(--text-1);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+}
+
+.breadcrumb-parent {
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.breadcrumb-parent:hover {
+  color: var(--text-2);
+}
+
+.breadcrumb-sep {
+  color: var(--text-3);
+}
+
+.breadcrumb-current {
+  color: var(--text-1);
+  font-weight: 500;
+}
+
+/* ─────────────────────────────
+   CONTENT
+───────────────────────────── */
+.detalle-content {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 24px 32px 40px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ─────────────────────────────
+   HEADER SOLICITUD
+───────────────────────────── */
+.solicitud-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.solicitud-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.solicitud-id {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 1px;
+}
+
+.solicitud-tipo {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.solicitud-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────
+   BADGES
+───────────────────────────── */
+.badge-estado,
+.badge-prioridad {
+  display: inline-block;
+
+  padding: 5px 12px;
+  border-radius: 8px;
+
+  font-size: 12px;
+}
+
+.badge-estado {
+  font-weight: 500;
+}
+
+.badge-prioridad {
+  font-weight: 600;
+}
+
+.estado-REGISTRADA {
+  background: var(--blue-dim);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  color: var(--blue);
+}
+
+.estado-CLASIFICADA {
+  background: var(--amber-dim);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: var(--amber);
+}
+
+.estado-EN_ATENCION {
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--amber);
+}
+
+.estado-ATENDIDA {
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  color: var(--accent);
+}
+
+.estado-CERRADA {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+.prio-ALTA {
+  background: var(--red-dim);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: var(--red);
+}
+
+.prio-MEDIA {
+  background: var(--amber-dim);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: var(--amber);
+}
+
+.prio-BAJA {
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  color: var(--accent);
+}
+
+/* ─────────────────────────────
+   INFO GRID
+───────────────────────────── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.info-card {
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  transition: border-color 0.2s;
+}
+
+.info-card:hover {
+  border-color: var(--border-hover);
+}
+
+.info-card-full {
+  grid-column: 1 / -1;
+}
+
+.info-label {
+  font-size: 11px;
+  font-weight: 500;
+
+  color: var(--text-3);
+
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.info-value {
+  font-size: 14px;
+  color: var(--text-1);
+  line-height: 1.5;
+}
+
+.info-desc {
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.info-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.info-empty {
+  font-size: 13px;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* ─────────────────────────────
+   USER DISPLAY
+───────────────────────────── */
+.user-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-dot {
+  width: 36px;
+  height: 36px;
+
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+
+  color: var(--accent);
+
+  flex-shrink: 0;
+}
+
+.user-dot-blue {
+  background: var(--blue-dim);
+  border-color: rgba(129, 140, 248, 0.2);
+  color: var(--blue);
+}
+
+.historial-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historial-titulo {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.historial-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.historial-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.historial-item:last-child {
+  border-bottom: none;
+}
+.historial-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.historial-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.historial-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.historial-accion {
+  font-size: 13px;
+  color: var(--text-1);
+}
+
+.historial-fecha {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.ia-sugerencia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-ia {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-ia:hover:not(:disabled) {
+  background: rgba(110, 231, 183, 0.18);
+  border-color: rgba(110, 231, 183, 0.4);
+}
+
+.btn-ia:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner-dark {
+  border-color: rgba(110, 231, 183, 0.3);
+  border-top-color: var(--accent);
+}
+
+/* ─────────────────────────────
+   ACTION BUTTONS
+───────────────────────────── */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  color: white;
+}
+
+.btn-blue {
+  background: var(--blue-dim);
+  border-color: rgba(129, 140, 248, 0.25);
+  color: var(--blue);
+}
+
+.btn-blue:hover {
+  background: rgba(129, 140, 248, 0.18);
+}
+
+.btn-amber {
+  background: var(--amber-dim);
+  border-color: rgba(251, 191, 36, 0.25);
+  color: var(--amber);
+}
+
+.btn-amber:hover {
+  background: rgba(251, 191, 36, 0.18);
+}
+
+.btn-accent {
+  background: var(--accent-dim);
+  border-color: rgba(110, 231, 183, 0.25);
+  color: var(--accent);
+}
+
+.btn-accent:hover {
+  background: rgba(110, 231, 183, 0.18);
+}
+
+/* ─────────────────────────────
+   MODAL
+───────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 30px 80px rgba(0, 0, 0, 0.45);
+
+  animation: modalIn 0.18s ease;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.modal-close {
+  width: 34px;
+  height: 34px;
+
+  border: 1px solid var(--border);
+  background: transparent;
+
+  border-radius: 10px;
+
+  color: var(--text-2);
+
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-1);
+}
+
+/* ─────────────────────────────
+   FORM
+───────────────────────────── */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.field-input {
+  width: 100%;
+
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+
+  border-radius: 10px;
+
+  padding: 12px 14px;
+
+  color: var(--text-1);
+
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+
+  outline: none;
+
+  transition: border-color 0.15s;
+}
+
+.field-input:focus {
+  border-color: rgba(110, 231, 183, 0.4);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* ─────────────────────────────
+   MODAL ACTIONS
+───────────────────────────── */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  margin-top: 8px;
+}
+
+.btn-cancel,
+.btn-confirm {
+  padding: 10px 18px;
+
+  border-radius: 10px;
+
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-1);
+}
+
+.btn-confirm {
+  border: 1px solid rgba(110, 231, 183, 0.25);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.btn-confirm:hover {
+  background: rgba(110, 231, 183, 0.18);
+}
+
+.btn-amber-confirm {
+  background: var(--amber-dim);
+  border-color: rgba(251, 191, 36, 0.25);
+  color: var(--amber);
+}
+
+/* ─────────────────────────────
+   ERRORS
+───────────────────────────── */
+.error-msg {
+  font-size: 12px;
+  color: var(--red);
+}
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  background: var(--red-dim);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+
+  color: var(--red);
+
+  font-size: 13px;
+}
+
+/* ─────────────────────────────
+   SPINNER
+───────────────────────────── */
+.spinner {
+  width: 14px;
+  height: 14px;
+
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: currentColor;
+
+  animation: spin 0.7s linear infinite;
+}
+
+.loader-ring {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top-color: var(--accent);
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</file>
+
+<file path="src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.html">
+<div class="detalle-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-hex">⬡</span>
+      <span class="logo-text">SGS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" (click)="volver()">
+        <span class="nav-icon">▦</span>
+        <span>Solicitudes</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">{{ userInitial() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">{{ userRole() }}</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">⏻</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-back" (click)="volver()">
+          <span>←</span>
+          <span>Volver</span>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-parent" (click)="volver()">Solicitudes</span>
+          <span class="breadcrumb-sep">/</span>
+          @if (solicitud()) {
+            <span class="breadcrumb-current">#{{ solicitud()!.id }}</span>
+          }
+        </div>
+      </div>
+
+      @if (solicitud()) {
+        <div class="action-buttons">
+          @if (puedeClasificar()) {
+            <button class="btn-action btn-blue" (click)="abrirModalClasificar()">Clasificar</button>
+          }
+          @if (puedeAsignar()) {
+            <button class="btn-action btn-blue" (click)="abrirModalAsignar()">
+              Asignar responsable
+            </button>
+          }
+          @if (puedeTomar()) {
+            <button class="btn-action btn-blue" (click)="tomarSolicitud()">Tomar solicitud</button>
+          }
+          @if (puedeAtender()) {
+            <button class="btn-action btn-amber" (click)="abrirModalAtender()">
+              Marcar como atendida
+            </button>
+          }
+          @if (puedeCerrar()) {
+            <button class="btn-action btn-accent" (click)="abrirModalCerrar()">
+              Cerrar solicitud
+            </button>
+          }
+        </div>
+      }
+    </header>
+
+    @if (loading()) {
+      <div class="state-center">
+        <div class="loader-ring"></div>
+        <span>Cargando solicitud...</span>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="state-center">
+        <span class="state-icon">⚠</span>
+        <span>{{ error() }}</span>
+        <button class="btn-retry" (click)="volver()">Volver a la lista</button>
+      </div>
+    }
+
+    @if (solicitud()) {
+      <div class="detalle-content">
+        <div class="solicitud-header">
+          <div class="solicitud-header-left">
+            <span class="solicitud-id">#{{ solicitud()!.id }}</span>
+            <h1 class="solicitud-tipo">{{ formatTipo(solicitud()!.tipoSolicitud) }}</h1>
+          </div>
+          <div class="solicitud-header-right">
+            <span class="badge-estado" [class]="'estado-' + solicitud()!.estado">
+              {{ formatEstado(solicitud()!.estado) }}
+            </span>
+            @if (solicitud()!.prioridad) {
+              <span class="badge-prioridad" [class]="'prio-' + solicitud()!.prioridad">
+                {{ solicitud()!.prioridad }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card info-card-full">
+            <span class="info-label">Descripción</span>
+            <p class="info-value info-desc">{{ solicitud()!.descripcion }}</p>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Solicitante</span>
+            <div class="user-display">
+              <div class="user-dot">
+                {{ solicitud()!.solicitante!.nombre.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <p class="info-value">{{ solicitud()!.solicitante!.nombre }}</p>
+                <p class="info-sub">{{ solicitud()!.solicitante!.correo }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Responsable</span>
+            @if (solicitud()!.responsable) {
+              <div class="user-display">
+                <div class="user-dot user-dot-blue">
+                  {{ solicitud()!.responsable!.nombre.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <p class="info-value">{{ solicitud()!.responsable!.nombre }}</p>
+                  <p class="info-sub">{{ solicitud()!.responsable!.correo }}</p>
+                </div>
+              </div>
+            } @else {
+              <p class="info-empty">Sin asignar</p>
+            }
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Fecha de creación</span>
+            <p class="info-value">{{ solicitud()!.fecha | date: 'dd/MM/yyyy, h:mm a' }}</p>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Justificación de prioridad</span>
+            @if (solicitud()!.justificacionPrioridad) {
+              <p class="info-value">{{ solicitud()!.justificacionPrioridad }}</p>
+            } @else {
+              <p class="info-empty">Sin justificación asignada</p>
+            }
+          </div>
+        </div>
+        @if (historial().length > 0) {
+          <div class="historial-section">
+            <h3 class="historial-titulo">Historial</h3>
+            <div class="historial-lista">
+              @for (h of historial(); track h.id) {
+                <div class="historial-item">
+                  <div class="historial-dot"></div>
+                  <div class="historial-info">
+                    <p class="historial-accion">{{ h.accion }}</p>
+                    <span class="historial-fecha">{{ h.fecha | date: 'dd/MM/yyyy, h:mm a' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<!-- MODAL: CLASIFICAR -->
+@if (modalClasificar()) {
+  <div class="modal-backdrop" (click)="cerrarModalClasificar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Clasificar solicitud</h2>
+        <button class="modal-close" (click)="cerrarModalClasificar()">✕</button>
+      </div>
+      <form [formGroup]="clasificarForm" (ngSubmit)="clasificar()" class="modal-form">
+        <!-- Botón IA va aquí, dentro del form -->
+        <div class="ia-sugerencia">
+          <button type="button" class="btn-ia" (click)="sugerirConIA()" [disabled]="loadingIA()">
+            @if (loadingIA()) {
+              <span class="spinner spinner-dark"></span> Analizando...
+            } @else {
+              ⬡ Sugerir con IA
+            }
+          </button>
+          @if (errorIA()) {
+            <span class="error-msg">{{ errorIA() }}</span>
+          }
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Prioridad</label>
+          <select class="field-input" formControlName="prioridad">
+            <option value="">Seleccionar...</option>
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Media</option>
+            <option value="BAJA">Baja</option>
+          </select>
+          @if (
+            clasificarForm.get('prioridad')!.touched &&
+            clasificarForm.get('prioridad')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona una prioridad</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Justificación</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="justificacion"
+            placeholder="Explica el motivo de la clasificación..."
+            rows="4"
+          ></textarea>
+          @if (
+            clasificarForm.get('justificacion')!.touched &&
+            clasificarForm.get('justificacion')!.hasError('required')
+          ) {
+            <span class="error-msg">La justificación es obligatoria</span>
+          }
+        </div>
+        @if (errorClasificar()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorClasificar() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalClasificar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingClasificar()">
+            @if (loadingClasificar()) {
+              <span class="spinner"></span> Clasificando...
+            } @else {
+              Clasificar
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL: ASIGNAR RESPONSABLE -->
+@if (modalAsignar()) {
+  <div class="modal-backdrop" (click)="cerrarModalAsignar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Asignar responsable</h2>
+        <button class="modal-close" (click)="cerrarModalAsignar()">✕</button>
+      </div>
+      <div class="modal-form">
+        @if (loadingResponsables()) {
+          <div class="modal-loading">
+            <div class="loader-ring"></div>
+            <span>Cargando responsables...</span>
+          </div>
+        } @else {
+          <div class="field-group">
+            <label class="field-label">Responsable</label>
+            <select class="field-input" (change)="seleccionarResponsable($event)">
+              <option value="">Seleccionar...</option>
+              @for (r of responsables(); track r.id) {
+                <option [value]="r.id">
+                  {{ r.nombre }} —
+                  {{ r.role === 'ROL_ADMINISTRATIVO' ? 'Administrativo' : 'Docente' }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+        @if (errorAsignar()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorAsignar() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalAsignar()">Cancelar</button>
+          <button
+            class="btn-confirm"
+            [disabled]="!responsableSeleccionado() || loadingAsignar()"
+            (click)="asignarResponsable()"
+          >
+            @if (loadingAsignar()) {
+              <span class="spinner"></span> Asignando...
+            } @else {
+              Asignar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL: ATENDER -->
+@if (modalAtender()) {
+  <div class="modal-backdrop" (click)="cerrarModalAtender()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Marcar como atendida</h2>
+        <button class="modal-close" (click)="cerrarModalAtender()">✕</button>
+      </div>
+      <form [formGroup]="atenderForm" (ngSubmit)="atender()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Anotación</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="anotacion"
+            placeholder="Describe cómo fue atendida la solicitud..."
+            rows="4"
+          ></textarea>
+          @if (
+            atenderForm.get('anotacion')!.touched &&
+            atenderForm.get('anotacion')!.hasError('required')
+          ) {
+            <span class="error-msg">La anotación es obligatoria</span>
+          }
+        </div>
+        @if (errorAtender()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorAtender() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalAtender()">Cancelar</button>
+          <button type="submit" class="btn-confirm btn-amber-confirm" [disabled]="loadingAtender()">
+            @if (loadingAtender()) {
+              <span class="spinner"></span> Guardando...
+            } @else {
+              Marcar como atendida
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL: CERRAR -->
+@if (modalCerrar()) {
+  <div class="modal-backdrop" (click)="cerrarModalCerrar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Cerrar solicitud</h2>
+        <button class="modal-close" (click)="cerrarModalCerrar()">✕</button>
+      </div>
+      <form [formGroup]="cerrarForm" (ngSubmit)="cerrar()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Anotación de cierre</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="anotacion"
+            placeholder="Describe el resultado final de la solicitud..."
+            rows="4"
+          ></textarea>
+          @if (
+            cerrarForm.get('anotacion')!.touched &&
+            cerrarForm.get('anotacion')!.hasError('required')
+          ) {
+            <span class="error-msg">La anotación es obligatoria</span>
+          }
+        </div>
+        @if (errorCerrar()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorCerrar() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalCerrar()">Cancelar</button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingCerrar()">
+            @if (loadingCerrar()) {
+              <span class="spinner"></span> Cerrando...
+            } @else {
+              Cerrar solicitud
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+</file>
+
+<file path="src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.spec.ts">
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { DetalleSolicitud } from './detalle-solicitud';
+
+describe('DetalleSolicitud', () => {
+  let component: DetalleSolicitud;
+  let fixture: ComponentFixture<DetalleSolicitud>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DetalleSolicitud],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DetalleSolicitud);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+</file>
+
+<file path="src/app/features/solicitudes/detalle-solicitud/detalle-solicitud.ts">
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SolicitudService } from '../../../core/services/solicitud.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { UsuarioService } from '../../../core/services/usuario.service';
+import { Solicitud, Estado, TipoSolicitud } from '../../../core/models/solicitud.model';
+import { UsuarioResumen } from '../../../core/models/usuario.model';
+import { HistorialService } from '../../../core/services/historial.service';
+import { Historial } from '../../../core/models/historial';
+import { IaService } from '../../../core/services/ia.service';
+
+@Component({
+  selector: 'app-detalle-solicitud',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './detalle-solicitud.html',
+  styleUrl: './detalle-solicitud.css',
+})
+export class DetalleSolicitud implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private solicitudService = inject(SolicitudService);
+  private authService = inject(AuthService);
+  private usuarioService = inject(UsuarioService);
+  private fb = inject(FormBuilder);
+  private historialService = inject(HistorialService);
+  private iaService = inject(IaService);
+
+  loadingIA = signal(false);
+  errorIA = signal('');
+  historial = signal<Historial[]>([]);
+  solicitud = signal<Solicitud | null>(null);
+  loading = signal(true);
+  error = signal('');
+
+  rol = computed(() => this.authService.getRole());
+
+  puedeClasificar = computed(
+    () =>
+      (this.rol() === 'ROL_ADMINISTRATIVO' || this.rol() === 'ROL_DOCENTE') &&
+      this.solicitud()?.estado === 'REGISTRADA',
+  );
+
+  puedeAsignar = computed(
+    () => this.rol() === 'ROL_ADMINISTRATIVO' && this.solicitud()?.estado === 'CLASIFICADA',
+  );
+
+  puedeTomar = computed(
+    () => this.rol() === 'ROL_DOCENTE' && this.solicitud()?.estado === 'CLASIFICADA',
+  );
+
+  puedeAtender = computed(
+    () =>
+      (this.rol() === 'ROL_ADMINISTRATIVO' || this.rol() === 'ROL_DOCENTE') &&
+      this.solicitud()?.estado === 'EN_ATENCION',
+  );
+
+  puedeCerrar = computed(
+    () => this.rol() === 'ROL_ADMINISTRATIVO' && this.solicitud()?.estado === 'ATENDIDA',
+  );
+
+  // ── Modal: Clasificar ──
+  modalClasificar = signal(false);
+  loadingClasificar = signal(false);
+  errorClasificar = signal('');
+
+  clasificarForm: FormGroup = this.fb.group({
+    prioridad: ['', Validators.required],
+    justificacion: ['', Validators.required],
+  });
+
+  modalAsignar = signal(false);
+  responsables = signal<UsuarioResumen[]>([]);
+  loadingResponsables = signal(false);
+  errorAsignar = signal('');
+  responsableSeleccionado = signal<number | null>(null);
+  loadingAsignar = signal(false);
+
+  modalAtender = signal(false);
+  loadingAtender = signal(false);
+  errorAtender = signal('');
+
+  atenderForm: FormGroup = this.fb.group({
+    anotacion: ['', Validators.required],
+  });
+
+  modalCerrar = signal(false);
+  loadingCerrar = signal(false);
+  errorCerrar = signal('');
+
+  cerrarForm: FormGroup = this.fb.group({
+    anotacion: ['', Validators.required],
+  });
+
+  userName = computed(() => {
+    const token = this.authService.token();
+    if (!token) return '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.nombre ?? payload.sub ?? 'Usuario';
+    } catch {
+      return 'Usuario';
+    }
+  });
+  sugerirConIA() {
+    const descripcion = this.solicitud()!.descripcion;
+    this.loadingIA.set(true);
+    this.errorIA.set('');
+
+    this.iaService.clasificar(descripcion).subscribe({
+      next: (sugerencia) => {
+        this.clasificarForm.patchValue({
+          prioridad: sugerencia.prioridad,
+          justificacion: sugerencia.explicacion,
+        });
+        this.loadingIA.set(false);
+      },
+      error: () => {
+        this.errorIA.set('No se pudo obtener sugerencia de la IA.');
+        this.loadingIA.set(false);
+      },
+    });
+  }
+
+  userInitial = computed(() => this.userName().charAt(0).toUpperCase());
+
+  userRole = computed(() => {
+    const role = this.authService.getRole();
+    const labels: Record<string, string> = {
+      ROL_ESTUDIANTE: 'Estudiante',
+      ROL_ADMINISTRATIVO: 'Administrativo',
+      ROL_DOCENTE: 'Docente',
+    };
+    return role ? (labels[role] ?? role) : '';
+  });
+
+  // ══════════════════════════════
+  // CICLO DE VIDA
+  // ══════════════════════════════
+  ngOnInit() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.cargarSolicitud(id);
+  }
+
+  cargarSolicitud(id: number) {
+    this.loading.set(true);
+    this.error.set('');
+
+    this.solicitudService.obtener(id).subscribe({
+      next: (data) => {
+        this.solicitud.set(data);
+        this.loading.set(false);
+        this.cargarHistorial(data.id);
+      },
+      error: () => {
+        this.error.set('No se pudo cargar la solicitud.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  cargarHistorial(id: number) {
+    this.historialService.obtener(id).subscribe({
+      next: (data) => this.historial.set(data),
+      error: () => {},
+    });
+  }
+
+  volver() {
+    this.router.navigate(['/solicitudes']);
+  }
+
+  // ══════════════════════════════
+  // CLASIFICAR
+  // ══════════════════════════════
+  abrirModalClasificar() {
+    this.clasificarForm.reset();
+    this.errorClasificar.set('');
+    this.modalClasificar.set(true);
+  }
+
+  cerrarModalClasificar() {
+    this.modalClasificar.set(false);
+  }
+
+  clasificar() {
+    if (this.clasificarForm.invalid) {
+      this.clasificarForm.markAllAsTouched();
+      return;
+    }
+
+    this.loadingClasificar.set(true);
+    this.errorClasificar.set('');
+
+    const id = this.solicitud()!.id;
+
+    this.solicitudService.clasificar(id, this.clasificarForm.value).subscribe({
+      next: (actualizada) => {
+        this.solicitud.set(actualizada);
+        this.loadingClasificar.set(false);
+        this.modalClasificar.set(false);
+        this.cargarHistorial(actualizada.id);
+      },
+      error: () => {
+        this.errorClasificar.set('No se pudo clasificar la solicitud.');
+        this.loadingClasificar.set(false);
+      },
+    });
+  }
+
+  // ══════════════════════════════
+  // ASIGNAR RESPONSABLE
+  // ══════════════════════════════
+  abrirModalAsignar() {
+    this.errorAsignar.set('');
+    this.responsableSeleccionado.set(null);
+    this.loadingResponsables.set(true);
+    this.modalAsignar.set(true);
+
+    this.usuarioService.obtenerResponsables().subscribe({
+      next: (data) => {
+        this.responsables.set(data);
+        this.loadingResponsables.set(false);
+      },
+      error: () => {
+        this.errorAsignar.set('No se pudo cargar la lista de responsables.');
+        this.loadingResponsables.set(false);
+      },
+    });
+  }
+
+  cerrarModalAsignar() {
+    this.modalAsignar.set(false);
+  }
+
+  seleccionarResponsable(event: Event) {
+    const id = Number((event.target as HTMLSelectElement).value);
+    this.responsableSeleccionado.set(id);
+  }
+
+  asignarResponsable() {
+    const responsableId = this.responsableSeleccionado();
+    if (!responsableId) return;
+
+    this.loadingAsignar.set(true);
+    this.errorAsignar.set('');
+
+    const id = this.solicitud()!.id;
+
+    this.solicitudService.asignarResponsable(id, responsableId).subscribe({
+      next: (actualizada) => {
+        this.solicitud.set(actualizada);
+        this.loadingAsignar.set(false);
+        this.modalAsignar.set(false);
+        this.cargarHistorial(actualizada.id);
+      },
+      error: () => {
+        this.errorAsignar.set('No se pudo asignar el responsable.');
+        this.loadingAsignar.set(false);
+      },
+    });
+  }
+
+  // ══════════════════════════════
+  // TOMAR SOLICITUD (docente)
+  // ══════════════════════════════
+  tomarSolicitud() {
+    const token = this.authService.token();
+    if (!token) return;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+
+      this.solicitudService.asignarResponsable(this.solicitud()!.id, userId).subscribe({
+        next: (actualizada) => {
+          this.solicitud.set(actualizada);
+          this.cargarHistorial(actualizada.id);
+        },
+        error: () => this.error.set('No se pudo tomar la solicitud.'),
+      });
+    } catch {
+      this.error.set('Error al obtener datos del usuario.');
+    }
+  }
+
+  // ══════════════════════════════
+  // ATENDER
+  // ══════════════════════════════
+  abrirModalAtender() {
+    this.atenderForm.reset();
+    this.errorAtender.set('');
+    this.modalAtender.set(true);
+  }
+
+  cerrarModalAtender() {
+    this.modalAtender.set(false);
+  }
+
+  atender() {
+    if (this.atenderForm.invalid) {
+      this.atenderForm.markAllAsTouched();
+      return;
+    }
+
+    this.loadingAtender.set(true);
+    this.errorAtender.set('');
+
+    const id = this.solicitud()!.id;
+    const anotacion = this.atenderForm.value.anotacion;
+
+    this.solicitudService.atender(id, anotacion).subscribe({
+      next: (actualizada) => {
+        this.solicitud.set(actualizada);
+        this.loadingAtender.set(false);
+        this.modalAtender.set(false);
+        this.cargarHistorial(actualizada.id);
+      },
+      error: () => {
+        this.errorAtender.set('No se pudo marcar como atendida.');
+        this.loadingAtender.set(false);
+      },
+    });
+  }
+
+  // ══════════════════════════════
+  // CERRAR
+  // ══════════════════════════════
+  abrirModalCerrar() {
+    this.cerrarForm.reset();
+    this.errorCerrar.set('');
+    this.modalCerrar.set(true);
+  }
+
+  cerrarModalCerrar() {
+    this.modalCerrar.set(false);
+  }
+
+  cerrar() {
+    if (this.cerrarForm.invalid) {
+      this.cerrarForm.markAllAsTouched();
+      return;
+    }
+
+    this.loadingCerrar.set(true);
+    this.errorCerrar.set('');
+
+    const id = this.solicitud()!.id;
+    const anotacion = this.cerrarForm.value.anotacion;
+
+    this.solicitudService.cerrar(id, anotacion).subscribe({
+      next: (actualizada) => {
+        this.solicitud.set(actualizada);
+        this.loadingCerrar.set(false);
+        this.modalCerrar.set(false);
+        this.cargarHistorial(actualizada.id);
+      },
+      error: () => {
+        this.errorCerrar.set('No se pudo cerrar la solicitud.');
+        this.loadingCerrar.set(false);
+      },
+    });
+  }
+
+  // ══════════════════════════════
+  // FORMATTERS
+  // ══════════════════════════════
+  formatEstado(estado: Estado): string {
+    const map: Record<string, string> = {
+      REGISTRADA: 'Registrada',
+      CLASIFICADA: 'Clasificada',
+      EN_ATENCION: 'En atención',
+      ATENDIDA: 'Atendida',
+      CERRADA: 'Cerrada',
+    };
+    return map[estado] ?? estado;
+  }
+
+  formatTipo(tipo: TipoSolicitud): string {
+    const map: Record<string, string> = {
+      REGISTRO_ASIGNATURAS: 'Registro',
+      HOMOLOGACION: 'Homologación',
+      CANCELACION_ASIGNATURAS: 'Cancelación',
+      SOLICITUD_CUPOS: 'Cupos',
+      CONSULTA_ACADEMICA: 'Consulta',
+    };
+    return map[tipo] ?? tipo;
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+}
+</file>
+
+<file path="src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.css">
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+/* ── Reset & Host ── */
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Variables ── */
+:host {
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --surface-2: #141422;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.13);
+  --accent: #6ee7b7;
+  --accent-dim: rgba(110, 231, 183, 0.1);
+  --accent-glow: rgba(110, 231, 183, 0.25);
+  --blue: #818cf8;
+  --blue-dim: rgba(129, 140, 248, 0.1);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251, 191, 36, 0.1);
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.1);
+  --text-1: #eeeef5;
+  --text-2: #9090b0;
+  --text-3: #55556a;
+  --sidebar-w: 220px;
+  --radius: 12px;
+}
+
+/* ── Layout ── */
+.dashboard {
+  display: flex;
+  height: 100vh;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-1);
+  overflow: hidden;
+}
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  margin-bottom: 36px;
+}
+
+.logo-hex {
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--text-1);
+}
+
+/* Nav */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-1);
+}
+
+.nav-active {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  font-weight: 500;
+}
+
+.nav-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.nav-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Footer */
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.btn-logout {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-logout:hover {
+  background: var(--red-dim);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: var(--red);
+}
+
+/* ══════════════════════════════
+   MAIN
+══════════════════════════════ */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Topbar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px 0;
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #080810;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.btn-create:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.btn-plus {
+  font-size: 18px;
+  line-height: 1;
+  margin-top: -1px;
+}
+
+/* ── Stats ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 24px 32px 0;
+  flex-shrink: 0;
+}
+
+.stat-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card:hover {
+  border-color: var(--border-hover);
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-1);
+  line-height: 1;
+}
+
+.stat-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 28px;
+  opacity: 0.08;
+}
+
+.stat-registrada {
+  border-left: 3px solid var(--blue);
+}
+.stat-registrada .stat-value {
+  color: var(--blue);
+}
+.stat-proceso {
+  border-left: 3px solid var(--amber);
+}
+.stat-proceso .stat-value {
+  color: var(--amber);
+}
+.stat-cerrada {
+  border-left: 3px solid var(--accent);
+}
+.stat-cerrada .stat-value {
+  color: var(--accent);
+}
+
+/* ── Filters ── */
+.filters-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 20px 32px 0;
+  flex-shrink: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 150px;
+}
+
+.filter-select:focus {
+  border-color: var(--accent);
+}
+.filter-select option {
+  background: var(--surface-2);
+}
+
+.btn-reset {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-3);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-reset:hover {
+  border-color: var(--border-hover);
+  color: var(--text-2);
+}
+
+/* ── Table ── */
+.table-section {
+  flex: 1;
+  padding: 20px 32px 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table-row {
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.data-table td {
+  padding: 13px 16px;
+  vertical-align: middle;
+  color: var(--text-2);
+}
+
+.td-id {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  color: var(--text-3) !important;
+  font-size: 12px;
+  width: 40px;
+}
+
+.td-desc {
+  color: var(--text-1) !important;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.td-fecha {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.td-responsable {
+  max-width: 140px;
+}
+
+/* Badges */
+.badge-tipo {
+  display: inline-block;
+  padding: 3px 8px;
+  background: var(--blue-dim);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  border-radius: 6px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-estado {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.estado-REGISTRADA {
+  background: var(--blue-dim);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  color: var(--blue);
+}
+.estado-CLASIFICADA {
+  background: var(--amber-dim);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: var(--amber);
+}
+.estado-EN_ATENCION {
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--amber);
+}
+.estado-ATENDIDA {
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  color: var(--accent);
+}
+.estado-CERRADA {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+.badge-prioridad {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.prio-ALTA {
+  background: var(--red-dim);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: var(--red);
+}
+.prio-MEDIA {
+  background: var(--amber-dim);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: var(--amber);
+}
+.prio-BAJA {
+  background: var(--accent-dim);
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  color: var(--accent);
+}
+
+.responsable-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.no-data {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+/* States */
+.state-loading,
+.state-error,
+.state-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 14px;
+  min-height: 200px;
+}
+
+.state-icon {
+  font-size: 28px;
+  opacity: 0.4;
+}
+
+.loader-ring {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-retry {
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-retry:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ══════════════════════════════
+   MODAL
+══════════════════════════════ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border-hover);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
+  animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.modal-close {
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: var(--red-dim);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: var(--red);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.field-input::placeholder {
+  color: rgba(255, 255, 255, 0.18);
+}
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.field-input option {
+  background: var(--surface-2);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: var(--red);
+}
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--red-dim);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 10px;
+  color: var(--red);
+  font-size: 13px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-cancel {
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cancel:hover {
+  border-color: var(--border-hover);
+  color: var(--text-1);
+}
+
+.btn-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #080810;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(8, 8, 16, 0.3);
+  border-top-color: #080810;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.nav-item-create {
+  margin-top: 8px;
+  color: var(--accent) !important;
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  background: var(--accent-dim);
+}
+
+.nav-item-create:hover {
+  background: rgba(110, 231, 183, 0.15) !important;
+}
+</file>
+
+<file path="src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.html">
+<div class="dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-hex">⬡</span>
+      <span class="logo-text">SGS</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item nav-active">
+        <span class="nav-icon">▦</span>
+        <span>Solicitudes</span>
+      </a>
+      <a class="nav-item nav-disabled">
+        <span class="nav-icon">◷</span>
+        <span>Historial</span>
+      </a>
+      @if (isAdmin()) {
+        <a class="nav-item nav-item-create" (click)="abrirModalUsuario()">
+          <span class="nav-icon">+</span>
+          <span>Crear usuario</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">{{ userInitial() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">{{ userRole() }}</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">⏻</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Solicitudes</h1>
+        <span class="page-subtitle">Gestión y seguimiento</span>
+      </div>
+      <div class="topbar-right">
+        @if (canCreate()) {
+          <button class="btn-create" (click)="abrirModal()">
+            <span class="btn-plus">+</span>
+            Nueva solicitud
+          </button>
+        }
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total</span>
+        <span class="stat-value">{{ totalSolicitudes() }}</span>
+        <span class="stat-icon">◈</span>
+      </div>
+      <div class="stat-card stat-registrada">
+        <span class="stat-label">Registradas</span>
+        <span class="stat-value">{{ countByEstado('REGISTRADA') }}</span>
+        <span class="stat-icon">○</span>
+      </div>
+      <div class="stat-card stat-proceso">
+        <span class="stat-label">En proceso</span>
+        <span class="stat-value">{{ countByEstado('EN_ATENCION') }}</span>
+        <span class="stat-icon">◑</span>
+      </div>
+      <div class="stat-card stat-cerrada">
+        <span class="stat-label">Cerradas</span>
+        <span class="stat-value">{{ countByEstado('CERRADA') }}</span>
+        <span class="stat-icon">●</span>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Estado</label>
+        <select class="filter-select" (change)="filtrarEstado($event)">
+          <option value="">Todos</option>
+          <option value="REGISTRADA">Registrada</option>
+          <option value="CLASIFICADA">Clasificada</option>
+          <option value="EN_ATENCION">En atención</option>
+          <option value="ATENDIDA">Atendida</option>
+          <option value="CERRADA">Cerrada</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Tipo</label>
+        <select class="filter-select" (change)="filtrarTipo($event)">
+          <option value="">Todos</option>
+          <option value="REGISTRO_ASIGNATURAS">Registro asignaturas</option>
+          <option value="HOMOLOGACION">Homologación</option>
+          <option value="CANCELACION_ASIGNATURAS">Cancelación asignaturas</option>
+          <option value="SOLICITUD_CUPOS">Solicitud cupos</option>
+          <option value="CONSULTA_ACADEMICA">Consulta académica</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Prioridad</label>
+        <select class="filter-select" (change)="filtrarPrioridad($event)">
+          <option value="">Todas</option>
+          <option value="ALTA">Alta</option>
+          <option value="MEDIA">Media</option>
+          <option value="BAJA">Baja</option>
+        </select>
+      </div>
+      <button class="btn-reset" (click)="resetFiltros()">Limpiar filtros</button>
+    </section>
+
+    <!-- Table -->
+    <section class="table-section">
+      @if (loading()) {
+        <div class="state-loading">
+          <div class="loader-ring"></div>
+          <span>Cargando solicitudes...</span>
+        </div>
+      } @else if (error()) {
+        <div class="state-error">
+          <span class="state-icon">⚠</span>
+          <span>{{ error() }}</span>
+          <button class="btn-retry" (click)="cargarSolicitudes()">Reintentar</button>
+        </div>
+      } @else if (solicitudesFiltradas().length === 0) {
+        <div class="state-empty">
+          <span class="state-icon">◎</span>
+          <span>No hay solicitudes que mostrar</span>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Descripción</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Fecha</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of solicitudesFiltradas(); track s.id) {
+                <tr class="table-row" (click)="verDetalle(s.id)">
+                  <td class="td-id">{{ s.id }}</td>
+                  <td class="td-desc">{{ s.descripcion }}</td>
+                  <td>
+                    <span class="badge-tipo">{{ formatTipo(s.tipoSolicitud) }}</span>
+                  </td>
+                  <td>
+                    <span class="badge-estado" [class]="'estado-' + s.estado">{{
+                      formatEstado(s.estado)
+                    }}</span>
+                  </td>
+                  <td>
+                    @if (s.prioridad) {
+                      <span class="badge-prioridad" [class]="'prio-' + s.prioridad">{{
+                        s.prioridad
+                      }}</span>
+                    } @else {
+                      <span class="no-data">—</span>
+                    }
+                  </td>
+                  <td class="td-fecha">{{ s.fecha | date: 'dd/MM/yy' }}</td>
+                  <td class="td-responsable">
+                    @if (s.responsable) {
+                      <span class="responsable-chip">{{ s.responsable.nombre }}</span>
+                    } @else {
+                      <span class="no-data">Sin asignar</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </main>
+</div>
+
+<!-- Modal crear solicitud -->
+@if (modalAbierto()) {
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Nueva Solicitud</h2>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+      </div>
+      <form [formGroup]="solicitudForm" (ngSubmit)="crearSolicitud()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Tipo de solicitud</label>
+          <select class="field-input" formControlName="tipoSolicitud">
+            <option value="">Seleccionar...</option>
+            <option value="REGISTRO_ASIGNATURAS">Registro de asignaturas</option>
+            <option value="HOMOLOGACION">Homologación</option>
+            <option value="CANCELACION_ASIGNATURAS">Cancelación de asignaturas</option>
+            <option value="SOLICITUD_CUPOS">Solicitud de cupos</option>
+            <option value="CONSULTA_ACADEMICA">Consulta académica</option>
+          </select>
+          @if (
+            solicitudForm.get('tipoSolicitud')!.touched &&
+            solicitudForm.get('tipoSolicitud')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona un tipo</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Origen</label>
+          <select class="field-input" formControlName="origen">
+            <option value="">Seleccionar...</option>
+            <option value="CSU">CSU</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="CORREO">Correo</option>
+            <option value="SAC">SAC</option>
+            <option value="TELEFONICO">Telefónico</option>
+          </select>
+          @if (
+            solicitudForm.get('origen')!.touched &&
+            solicitudForm.get('origen')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona un origen</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Descripción</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="descripcion"
+            placeholder="Describe tu solicitud con detalle..."
+            rows="4"
+          ></textarea>
+          @if (
+            solicitudForm.get('descripcion')!.touched &&
+            solicitudForm.get('descripcion')!.hasError('required')
+          ) {
+            <span class="error-msg">La descripción es obligatoria</span>
+          }
+        </div>
+        @if (errorCrear()) {
+          <div class="alert-error">
+            <span>⚠</span>
+            <span>{{ errorCrear() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingCrear()">
+            @if (loadingCrear()) {
+              <span class="spinner"></span> Creando...
+            } @else {
+              Crear solicitud
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal crear usuario -->
+@if (modalCrearUsuario()) {
+  <div class="modal-backdrop" (click)="cerrarModalUsuario()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Crear usuario</h2>
+        <button class="modal-close" (click)="cerrarModalUsuario()">✕</button>
+      </div>
+      <form [formGroup]="usuarioForm" (ngSubmit)="crearUsuario()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Nombre completo</label>
+          <input
+            type="text"
+            class="field-input"
+            formControlName="nombre"
+            placeholder="Nombre completo"
+          />
+          @if (
+            usuarioForm.get('nombre')!.touched && usuarioForm.get('nombre')!.hasError('required')
+          ) {
+            <span class="error-msg">El nombre es obligatorio</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Correo</label>
+          <input
+            type="email"
+            class="field-input"
+            formControlName="correo"
+            placeholder="correo@universidad.edu.co"
+          />
+          @if (
+            usuarioForm.get('correo')!.touched && usuarioForm.get('correo')!.hasError('required')
+          ) {
+            <span class="error-msg">El correo es obligatorio</span>
+          }
+          @if (usuarioForm.get('correo')!.touched && usuarioForm.get('correo')!.hasError('email')) {
+            <span class="error-msg">Ingresa un correo válido</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contraseña</label>
+          <input
+            type="password"
+            class="field-input"
+            formControlName="password"
+            placeholder="••••••••"
+          />
+          @if (
+            usuarioForm.get('password')!.touched &&
+            usuarioForm.get('password')!.hasError('required')
+          ) {
+            <span class="error-msg">La contraseña es obligatoria</span>
+          }
+          @if (
+            usuarioForm.get('password')!.touched &&
+            usuarioForm.get('password')!.hasError('minlength')
+          ) {
+            <span class="error-msg">Mínimo 6 caracteres</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Rol</label>
+          <select class="field-input" formControlName="role" (change)="onRolChange($event)">
+            <option value="">Seleccionar...</option>
+            <option value="DOCENTE">Docente</option>
+            <option value="ADMINISTRATIVO">Administrativo</option>
+          </select>
+          @if (usuarioForm.get('role')!.touched && usuarioForm.get('role')!.hasError('required')) {
+            <span class="error-msg">Selecciona un rol</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tipo de contrato</label>
+          <select class="field-input" formControlName="tipoContrato">
+            <option value="">Seleccionar...</option>
+            <option value="PLANTA">Planta</option>
+            <option value="CATEDRATICO">Catedrático</option>
+          </select>
+          @if (
+            usuarioForm.get('tipoContrato')!.touched &&
+            usuarioForm.get('tipoContrato')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona un tipo de contrato</span>
+          }
+        </div>
+        @if (esAdminForm()) {
+          <div class="field-group">
+            <label class="field-label">Área</label>
+            <select class="field-input" formControlName="areaEncargada">
+              <option value="">Seleccionar...</option>
+              <option value="DIRECCION">Dirección</option>
+              <option value="FINANCIERA">Financiera</option>
+              <option value="TALENTO_HUMANO">Talento humano</option>
+              <option value="ACADEMICO_ADMINISTRATIVA">Académico administrativa</option>
+              <option value="TECNOLOGIA">Tecnología</option>
+              <option value="INFRAESTRUCTURA">Infraestructura</option>
+            </select>
+            @if (
+              usuarioForm.get('areaEncargada')!.touched &&
+              usuarioForm.get('areaEncargada')!.hasError('required')
+            ) {
+              <span class="error-msg">Selecciona un área</span>
+            }
+          </div>
+        }
+        @if (errorCrearUsuario()) {
+          <div class="alert-error">
+            <span>⚠</span>
+            <span>{{ errorCrearUsuario() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalUsuario()">Cancelar</button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingCrearUsuario()">
+            @if (loadingCrearUsuario()) {
+              <span class="spinner"></span> Creando...
+            } @else {
+              Crear usuario
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+</file>
+
+<file path="src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.spec.ts">
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { ListaSolicitudes } from './lista-solicitudes';
+
+describe('ListaSolicitudes', () => {
+  let component: ListaSolicitudes;
+  let fixture: ComponentFixture<ListaSolicitudes>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ListaSolicitudes],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ListaSolicitudes);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+</file>
+
+<file path="src/app/features/solicitudes/lista-solicitudes/lista-solicitudes.ts">
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { SolicitudService } from '../../../core/services/solicitud.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Solicitud, Estado, TipoSolicitud, Prioridad } from '../../../core/models/solicitud.model';
+
+@Component({
+  selector: 'app-lista-solicitudes',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './lista-solicitudes.html',
+  styleUrl: './lista-solicitudes.css',
+})
+export class ListaSolicitudes implements OnInit {
+  private solicitudService = inject(SolicitudService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private fb = inject(FormBuilder);
+
+  // ── Estado ──
+  solicitudes = signal<Solicitud[]>([]);
+  loading = signal(true);
+  error = signal('');
+
+  // ── Filtros ──
+  filtroEstado = signal<string>('');
+  filtroTipo = signal<string>('');
+  filtroPrioridad = signal<string>('');
+
+  // ── Modal crear solicitud ──
+  modalAbierto = signal(false);
+  loadingCrear = signal(false);
+  errorCrear = signal('');
+
+  // ── Modal crear usuario ──
+  modalCrearUsuario = signal(false);
+  loadingCrearUsuario = signal(false);
+  errorCrearUsuario = signal('');
+  rolSeleccionado = signal<string>('');
+
+  // ── Computed ──
+  solicitudesFiltradas = computed(() => {
+    return this.solicitudes().filter((s) => {
+      const matchEstado = !this.filtroEstado() || s.estado === this.filtroEstado();
+      const matchTipo = !this.filtroTipo() || s.tipoSolicitud === this.filtroTipo();
+      const matchPrioridad = !this.filtroPrioridad() || s.prioridad === this.filtroPrioridad();
+      return matchEstado && matchTipo && matchPrioridad;
+    });
+  });
+
+  totalSolicitudes = computed(() => this.solicitudes().length);
+
+  userName = computed(() => {
+    const token = this.authService.token();
+    if (!token) return '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.nombre ?? payload.sub ?? 'Usuario';
+    } catch {
+      return 'Usuario';
+    }
+  });
+
+  userInitial = computed(() => this.userName().charAt(0).toUpperCase());
+
+  userRole = computed(() => {
+    const role = this.authService.getRole();
+    const labels: Record<string, string> = {
+      ROL_ESTUDIANTE: 'Estudiante',
+      ROL_ADMINISTRATIVO: 'Administrativo',
+      ROL_DOCENTE: 'Docente',
+    };
+    return role ? (labels[role] ?? role) : '';
+  });
+
+  canCreate = computed(() => this.authService.getRole() === 'ROL_ESTUDIANTE');
+  isAdmin = computed(() => this.authService.getRole() === 'ROL_ADMINISTRATIVO');
+  esDocente = computed(() => this.rolSeleccionado() === 'DOCENTE');
+  esAdminForm = computed(() => this.rolSeleccionado() === 'ADMINISTRATIVO');
+
+  // ── Formularios ──
+  solicitudForm: FormGroup = this.fb.group({
+    tipoSolicitud: ['', Validators.required],
+    origen: ['', Validators.required],
+    descripcion: ['', Validators.required],
+  });
+
+  usuarioForm: FormGroup = this.fb.group({
+    nombre: ['', Validators.required],
+    correo: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    role: ['', Validators.required],
+    tipoContrato: ['', Validators.required],
+    areaEncargada: [''],
+  });
+
+  ngOnInit() {
+    this.cargarSolicitudes();
+  }
+
+  cargarSolicitudes() {
+    this.loading.set(true);
+    this.error.set('');
+    this.solicitudService.listar(0, 100).subscribe({
+      next: (page) => {
+        this.solicitudes.set(page.content);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('No se pudieron cargar las solicitudes.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  // ── Filtros ──
+  filtrarEstado(event: Event) {
+    this.filtroEstado.set((event.target as HTMLSelectElement).value);
+  }
+  filtrarTipo(event: Event) {
+    this.filtroTipo.set((event.target as HTMLSelectElement).value);
+  }
+  filtrarPrioridad(event: Event) {
+    this.filtroPrioridad.set((event.target as HTMLSelectElement).value);
+  }
+  resetFiltros() {
+    this.filtroEstado.set('');
+    this.filtroTipo.set('');
+    this.filtroPrioridad.set('');
+  }
+
+  // ── Stats ──
+  countByEstado(estado: string): number {
+    return this.solicitudes().filter((s) => s.estado === estado).length;
+  }
+
+  // ── Modal solicitud ──
+  abrirModal() {
+    this.solicitudForm.reset();
+    this.errorCrear.set('');
+    this.modalAbierto.set(true);
+  }
+  cerrarModal() {
+    this.modalAbierto.set(false);
+  }
+
+  crearSolicitud() {
+    if (this.solicitudForm.invalid) {
+      this.solicitudForm.markAllAsTouched();
+      return;
+    }
+    this.loadingCrear.set(true);
+    this.errorCrear.set('');
+    this.solicitudService.crear(this.solicitudForm.value).subscribe({
+      next: (nueva) => {
+        this.solicitudes.update((list) => [nueva, ...list]);
+        this.loadingCrear.set(false);
+        this.cerrarModal();
+      },
+      error: () => {
+        this.errorCrear.set('No se pudo crear la solicitud.');
+        this.loadingCrear.set(false);
+      },
+    });
+  }
+
+  // ── Modal crear usuario ──
+  abrirModalUsuario() {
+    this.usuarioForm.reset();
+    this.errorCrearUsuario.set('');
+    this.rolSeleccionado.set('');
+    this.modalCrearUsuario.set(true);
+  }
+
+  cerrarModalUsuario() {
+    this.modalCrearUsuario.set(false);
+  }
+
+  onRolChange(event: Event) {
+    const rol = (event.target as HTMLSelectElement).value;
+    this.rolSeleccionado.set(rol);
+    if (rol !== 'ADMINISTRATIVO') {
+      this.usuarioForm.get('areaEncargada')?.setValue('');
+    }
+  }
+
+  crearUsuario() {
+    if (this.esAdminForm() && !this.usuarioForm.get('areaEncargada')?.value) {
+      this.usuarioForm.get('areaEncargada')?.setErrors({ required: true });
+    }
+
+    if (this.usuarioForm.invalid) {
+      this.usuarioForm.markAllAsTouched();
+      return;
+    }
+
+    this.loadingCrearUsuario.set(true);
+    this.errorCrearUsuario.set('');
+
+    const formValue = this.usuarioForm.value;
+    const body: any = {
+      nombre: formValue.nombre,
+      correo: formValue.correo,
+      password: formValue.password,
+      role: formValue.role,
+      tipoContrato: formValue.tipoContrato,
+    };
+
+    if (formValue.areaEncargada) {
+      body.areaEncargada = formValue.areaEncargada;
+    }
+
+    this.authService.crearUsuario(body).subscribe({
+      next: () => {
+        this.loadingCrearUsuario.set(false);
+        this.cerrarModalUsuario();
+      },
+      error: (err) => {
+        this.loadingCrearUsuario.set(false);
+        if (err.status === 400) {
+          this.errorCrearUsuario.set('El correo ya está registrado.');
+        } else {
+          this.errorCrearUsuario.set('No se pudo crear el usuario.');
+        }
+      },
+    });
+  }
+
+  // ── Detalle ──
+  verDetalle(id: number) {
+    this.router.navigate(['/solicitudes', id]);
+  }
+
+  // ── Logout ──
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  // ── Formatters ──
+  formatEstado(estado: Estado): string {
+    const map: Record<string, string> = {
+      REGISTRADA: 'Registrada',
+      CLASIFICADA: 'Clasificada',
+      EN_ATENCION: 'En atención',
+      ATENDIDA: 'Atendida',
+      CERRADA: 'Cerrada',
+    };
+    return map[estado] ?? estado;
+  }
+
+  formatTipo(tipo: TipoSolicitud): string {
+    const map: Record<string, string> = {
+      REGISTRO_ASIGNATURAS: 'Registro',
+      HOMOLOGACION: 'Homologación',
+      CANCELACION_ASIGNATURAS: 'Cancelación',
+      SOLICITUD_CUPOS: 'Cupos',
+      CONSULTA_ACADEMICA: 'Consulta',
+    };
+    return map[tipo] ?? tipo;
+  }
+
+  toast = signal<{ mensaje: string; tipo: 'exito' | 'error' } | null>(null);
+
+  mostrarToast(mensaje: string, tipo: 'exito' | 'error' = 'exito') {
+    this.toast.set({ mensaje, tipo });
+    setTimeout(() => this.toast.set(null), 3000);
+  }
+}
+</file>
+
+<file path=".editorconfig">
+# Editor configuration, see https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.ts]
+quote_type = single
+ij_typescript_use_double_quotes = false
+
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+</file>
+
+<file path=".gitignore">
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# System files
+.DS_Store
+Thumbs.db
+</file>
+
+<file path=".prettierrc">
+{
+  "printWidth": 100,
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "angular"
+      }
+    }
+  ]
+}
+</file>
+
+<file path="angular.json">
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "gestion_solicitudes_front": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.css"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "gestion_solicitudes_front:build:production"
+            },
+            "development": {
+              "buildTarget": "gestion_solicitudes_front:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "gestion-solicitudes-front",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.11",
+    "@angular/cli": "^21.2.11",
+    "@angular/compiler-cli": "^21.2.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}
+</file>
+
+<file path="README.md">
+# GestionSolicitudesFront
+
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
+
+## Development server
+
+To start a local development server, run:
+
+```bash
+ng serve
+```
+
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+## Code scaffolding
+
+Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+
+```bash
+ng generate component component-name
+```
+
+For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+
+```bash
+ng generate --help
+```
+
+## Building
+
+To build the project run:
+
+```bash
+ng build
+```
+
+This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+## Running unit tests
+
+To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+
+```bash
+ng test
+```
+
+## Running end-to-end tests
+
+For end-to-end (e2e) testing, run:
+
+```bash
+ng e2e
+```
+
+Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+
+## Additional Resources
+
+For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+</file>
+
+<file path="src/app/app.config.ts">
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideRouter } from '@angular/router';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideAnimationsAsync(),
+    provideRouter(routes),
+  ],
+};
+</file>
+
+<file path="src/app/app.css">
+
+</file>
+
+<file path="src/app/app.html">
+<router-outlet />
+</file>
+
+<file path="src/app/app.routes.ts">
+import { Routes } from '@angular/router';
+import { Login } from './features/auth/login/login';
+import { Register } from './features/auth/register/register';
+import { ListaSolicitudes } from './features/solicitudes/lista-solicitudes/lista-solicitudes';
+import { authGuard } from './core/guards/auth-guard';
+import { DetalleSolicitud } from './features/solicitudes/detalle-solicitud/detalle-solicitud';
+
+export const routes: Routes = [
+  { path: 'login', component: Login },
+  { path: 'register', component: Register },
+  {
+    path: '',
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'solicitudes', pathMatch: 'full' },
+      { path: 'solicitudes', component: ListaSolicitudes },
+      { path: 'solicitudes/:id', component: DetalleSolicitud },
+    ],
+  },
+  { path: '**', redirectTo: 'login', pathMatch: 'full' },
+];
+</file>
+
+<file path="src/app/app.spec.ts">
+import { TestBed } from '@angular/core/testing';
+import { App } from './app';
+
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it('should render title', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, gestion_solicitudes_front');
+  });
+});
+</file>
+
+<file path="src/app/app.ts">
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
+  templateUrl: './app.html',
+  styleUrl: './app.css',
+})
+export class App {
+  protected readonly title = signal('Gestion de Solicitudes');
+}
+</file>
+
+<file path="src/index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>GestionSolicitudesFront</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>
+</file>
+
+<file path="src/main.ts">
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+</file>
+
+<file path="src/styles.css">
+/* You can add global styles to this file, and also import other style files */
+</file>
+
+<file path="tsconfig.app.json">
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts"
+  ]
+}
+</file>
+
+<file path="tsconfig.json">
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}
+</file>
+
+<file path="tsconfig.spec.json">
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "types": [
+      "vitest/globals"
+    ]
+  },
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.spec.ts"
+  ]
+}
+</file>
+
+</files>

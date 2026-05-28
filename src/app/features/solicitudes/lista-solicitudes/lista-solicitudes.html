@@ -1,0 +1,392 @@
+<div class="dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-hex">⬡</span>
+      <span class="logo-text">SGS</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item nav-active">
+        <span class="nav-icon">▦</span>
+        <span>Solicitudes</span>
+      </a>
+      <a class="nav-item nav-disabled">
+        <span class="nav-icon">◷</span>
+        <span>Historial</span>
+      </a>
+      @if (isAdmin()) {
+        <a class="nav-item nav-item-create" (click)="abrirModalUsuario()">
+          <span class="nav-icon">+</span>
+          <span>Crear usuario</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">{{ userInitial() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">{{ userRole() }}</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">⏻</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Solicitudes</h1>
+        <span class="page-subtitle">Gestión y seguimiento</span>
+      </div>
+      <div class="topbar-right">
+        @if (canCreate()) {
+          <button class="btn-create" (click)="abrirModal()">
+            <span class="btn-plus">+</span>
+            Nueva solicitud
+          </button>
+        }
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total</span>
+        <span class="stat-value">{{ totalSolicitudes() }}</span>
+        <span class="stat-icon">◈</span>
+      </div>
+      <div class="stat-card stat-registrada">
+        <span class="stat-label">Registradas</span>
+        <span class="stat-value">{{ countByEstado('REGISTRADA') }}</span>
+        <span class="stat-icon">○</span>
+      </div>
+      <div class="stat-card stat-proceso">
+        <span class="stat-label">En proceso</span>
+        <span class="stat-value">{{ countByEstado('EN_ATENCION') }}</span>
+        <span class="stat-icon">◑</span>
+      </div>
+      <div class="stat-card stat-cerrada">
+        <span class="stat-label">Cerradas</span>
+        <span class="stat-value">{{ countByEstado('CERRADA') }}</span>
+        <span class="stat-icon">●</span>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Estado</label>
+        <select class="filter-select" (change)="filtrarEstado($event)">
+          <option value="">Todos</option>
+          <option value="REGISTRADA">Registrada</option>
+          <option value="CLASIFICADA">Clasificada</option>
+          <option value="EN_ATENCION">En atención</option>
+          <option value="ATENDIDA">Atendida</option>
+          <option value="CERRADA">Cerrada</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Tipo</label>
+        <select class="filter-select" (change)="filtrarTipo($event)">
+          <option value="">Todos</option>
+          <option value="REGISTRO_ASIGNATURAS">Registro asignaturas</option>
+          <option value="HOMOLOGACION">Homologación</option>
+          <option value="CANCELACION_ASIGNATURAS">Cancelación asignaturas</option>
+          <option value="SOLICITUD_CUPOS">Solicitud cupos</option>
+          <option value="CONSULTA_ACADEMICA">Consulta académica</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Prioridad</label>
+        <select class="filter-select" (change)="filtrarPrioridad($event)">
+          <option value="">Todas</option>
+          <option value="ALTA">Alta</option>
+          <option value="MEDIA">Media</option>
+          <option value="BAJA">Baja</option>
+        </select>
+      </div>
+      <button class="btn-reset" (click)="resetFiltros()">Limpiar filtros</button>
+    </section>
+
+    <!-- Table -->
+    <section class="table-section">
+      @if (loading()) {
+        <div class="state-loading">
+          <div class="loader-ring"></div>
+          <span>Cargando solicitudes...</span>
+        </div>
+      } @else if (error()) {
+        <div class="state-error">
+          <span class="state-icon">⚠</span>
+          <span>{{ error() }}</span>
+          <button class="btn-retry" (click)="cargarSolicitudes()">Reintentar</button>
+        </div>
+      } @else if (solicitudesFiltradas().length === 0) {
+        <div class="state-empty">
+          <span class="state-icon">◎</span>
+          <span>No hay solicitudes que mostrar</span>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Descripción</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Fecha</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of solicitudesFiltradas(); track s.id) {
+                <tr class="table-row" (click)="verDetalle(s.id)">
+                  <td class="td-id">{{ s.id }}</td>
+                  <td class="td-desc">{{ s.descripcion }}</td>
+                  <td>
+                    <span class="badge-tipo">{{ formatTipo(s.tipoSolicitud) }}</span>
+                  </td>
+                  <td>
+                    <span class="badge-estado" [class]="'estado-' + s.estado">{{
+                      formatEstado(s.estado)
+                    }}</span>
+                  </td>
+                  <td>
+                    @if (s.prioridad) {
+                      <span class="badge-prioridad" [class]="'prio-' + s.prioridad">{{
+                        s.prioridad
+                      }}</span>
+                    } @else {
+                      <span class="no-data">—</span>
+                    }
+                  </td>
+                  <td class="td-fecha">{{ s.fecha | date: 'dd/MM/yy' }}</td>
+                  <td class="td-responsable">
+                    @if (s.responsable) {
+                      <span class="responsable-chip">{{ s.responsable.nombre }}</span>
+                    } @else {
+                      <span class="no-data">Sin asignar</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </main>
+</div>
+
+<!-- Modal crear solicitud -->
+@if (modalAbierto()) {
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Nueva Solicitud</h2>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+      </div>
+      <form [formGroup]="solicitudForm" (ngSubmit)="crearSolicitud()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Tipo de solicitud</label>
+          <select class="field-input" formControlName="tipoSolicitud">
+            <option value="">Seleccionar...</option>
+            <option value="REGISTRO_ASIGNATURAS">Registro de asignaturas</option>
+            <option value="HOMOLOGACION">Homologación</option>
+            <option value="CANCELACION_ASIGNATURAS">Cancelación de asignaturas</option>
+            <option value="SOLICITUD_CUPOS">Solicitud de cupos</option>
+            <option value="CONSULTA_ACADEMICA">Consulta académica</option>
+          </select>
+          @if (
+            solicitudForm.get('tipoSolicitud')!.touched &&
+            solicitudForm.get('tipoSolicitud')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona un tipo</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Origen</label>
+          <select class="field-input" formControlName="origen">
+            <option value="">Seleccionar...</option>
+            <option value="CSU">CSU</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="CORREO">Correo</option>
+            <option value="SAC">SAC</option>
+            <option value="TELEFONICO">Telefónico</option>
+          </select>
+          @if (
+            solicitudForm.get('origen')!.touched &&
+            solicitudForm.get('origen')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona un origen</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Descripción</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="descripcion"
+            placeholder="Describe tu solicitud con detalle..."
+            rows="4"
+          ></textarea>
+          @if (
+            solicitudForm.get('descripcion')!.touched &&
+            solicitudForm.get('descripcion')!.hasError('required')
+          ) {
+            <span class="error-msg">La descripción es obligatoria</span>
+          }
+        </div>
+        @if (errorCrear()) {
+          <div class="alert-error">
+            <span>⚠</span>
+            <span>{{ errorCrear() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingCrear()">
+            @if (loadingCrear()) {
+              <span class="spinner"></span> Creando...
+            } @else {
+              Crear solicitud
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal crear usuario -->
+@if (modalCrearUsuario()) {
+  <div class="modal-backdrop" (click)="cerrarModalUsuario()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Crear usuario</h2>
+        <button class="modal-close" (click)="cerrarModalUsuario()">✕</button>
+      </div>
+      <form [formGroup]="usuarioForm" (ngSubmit)="crearUsuario()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Nombre completo</label>
+          <input
+            type="text"
+            class="field-input"
+            formControlName="nombre"
+            placeholder="Nombre completo"
+          />
+          @if (
+            usuarioForm.get('nombre')!.touched && usuarioForm.get('nombre')!.hasError('required')
+          ) {
+            <span class="error-msg">El nombre es obligatorio</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Correo</label>
+          <input
+            type="email"
+            class="field-input"
+            formControlName="correo"
+            placeholder="correo@universidad.edu.co"
+          />
+          @if (
+            usuarioForm.get('correo')!.touched && usuarioForm.get('correo')!.hasError('required')
+          ) {
+            <span class="error-msg">El correo es obligatorio</span>
+          }
+          @if (usuarioForm.get('correo')!.touched && usuarioForm.get('correo')!.hasError('email')) {
+            <span class="error-msg">Ingresa un correo válido</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contraseña</label>
+          <input
+            type="password"
+            class="field-input"
+            formControlName="password"
+            placeholder="••••••••"
+          />
+          @if (
+            usuarioForm.get('password')!.touched &&
+            usuarioForm.get('password')!.hasError('required')
+          ) {
+            <span class="error-msg">La contraseña es obligatoria</span>
+          }
+          @if (
+            usuarioForm.get('password')!.touched &&
+            usuarioForm.get('password')!.hasError('minlength')
+          ) {
+            <span class="error-msg">Mínimo 6 caracteres</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Rol</label>
+          <select class="field-input" formControlName="role" (change)="onRolChange($event)">
+            <option value="">Seleccionar...</option>
+            <option value="DOCENTE">Docente</option>
+            <option value="ADMINISTRATIVO">Administrativo</option>
+          </select>
+          @if (usuarioForm.get('role')!.touched && usuarioForm.get('role')!.hasError('required')) {
+            <span class="error-msg">Selecciona un rol</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tipo de contrato</label>
+          <select class="field-input" formControlName="tipoContrato">
+            <option value="">Seleccionar...</option>
+            <option value="PLANTA">Planta</option>
+            <option value="CATEDRATICO">Catedrático</option>
+          </select>
+          @if (
+            usuarioForm.get('tipoContrato')!.touched &&
+            usuarioForm.get('tipoContrato')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona un tipo de contrato</span>
+          }
+        </div>
+        @if (esAdminForm()) {
+          <div class="field-group">
+            <label class="field-label">Área</label>
+            <select class="field-input" formControlName="areaEncargada">
+              <option value="">Seleccionar...</option>
+              <option value="DIRECCION">Dirección</option>
+              <option value="FINANCIERA">Financiera</option>
+              <option value="TALENTO_HUMANO">Talento humano</option>
+              <option value="ACADEMICO_ADMINISTRATIVA">Académico administrativa</option>
+              <option value="TECNOLOGIA">Tecnología</option>
+              <option value="INFRAESTRUCTURA">Infraestructura</option>
+            </select>
+            @if (
+              usuarioForm.get('areaEncargada')!.touched &&
+              usuarioForm.get('areaEncargada')!.hasError('required')
+            ) {
+              <span class="error-msg">Selecciona un área</span>
+            }
+          </div>
+        }
+        @if (errorCrearUsuario()) {
+          <div class="alert-error">
+            <span>⚠</span>
+            <span>{{ errorCrearUsuario() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalUsuario()">Cancelar</button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingCrearUsuario()">
+            @if (loadingCrearUsuario()) {
+              <span class="spinner"></span> Creando...
+            } @else {
+              Crear usuario
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
