@@ -1,0 +1,95 @@
+package uq.sistemagestionsolicitudes.service;
+
+import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import uq.sistemagestionsolicitudes.dto.LoginRequest;
+import uq.sistemagestionsolicitudes.dto.LoginResponse;
+import uq.sistemagestionsolicitudes.dto.RegisterRequest;
+import uq.sistemagestionsolicitudes.dto.RegisterResponse;
+import uq.sistemagestionsolicitudes.model.Administrativo;
+import uq.sistemagestionsolicitudes.model.Docente;
+import uq.sistemagestionsolicitudes.model.Estudiante;
+import uq.sistemagestionsolicitudes.model.Usuario;
+import uq.sistemagestionsolicitudes.repository.UsuarioRepository;
+import uq.sistemagestionsolicitudes.security.CustomUserDetails;
+import uq.sistemagestionsolicitudes.security.JwtService;
+
+@Service
+@AllArgsConstructor
+public class AuthService {
+    private final PasswordEncoder passwordEncoder;
+    private final UsuarioRepository usuarioRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    public LoginResponse login(LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getCorreo(),
+                        request.getPassword()
+                )
+        );
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        assert customUserDetails != null;
+        Usuario usuario = customUserDetails.getUsuario();
+        String token = jwtService.generateToken(usuario);
+        return new LoginResponse(token);
+    }
+
+    public RegisterResponse register(RegisterRequest request) {
+
+        if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
+            throw new RuntimeException("El usuario ya existe");
+        }
+
+        Usuario usuario;
+
+        switch (request.getRole()) {
+            case "ESTUDIANTE":
+                usuario = crearEstudiante(request);
+                break;
+            case "ADMINISTRATIVO":
+                usuario = crearAdministrativo(request);
+                break;
+            case "DOCENTE":
+                usuario = crearDocente(request);
+                break;
+            default:
+                throw new RuntimeException("Rol no válido");
+        }
+
+
+        usuario.setCorreo(request.getCorreo());
+        usuario.setNombre(request.getNombre());
+        usuario.setTelefono(request.getTelefono());
+
+
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        usuarioRepository.save(usuario);
+
+        String token = jwtService.generateToken(usuario);
+
+        RegisterResponse registerResponse = new RegisterResponse();
+        registerResponse.setContrato(request.getTipoContrato());
+        registerResponse.setCorreo(request.getCorreo());
+        registerResponse.setToken(token);
+        return registerResponse;
+    }
+
+    private Usuario crearEstudiante(RegisterRequest request) {
+        return new Estudiante(request.getSemestre());
+    }
+
+    private Usuario crearAdministrativo(RegisterRequest request) {
+        return new Administrativo(request.getAreaEncargada(), request.getTipoContrato());
+    }
+
+    private Usuario crearDocente(RegisterRequest request) {
+        return new Docente(request.getTipoContrato());
+    }
+}

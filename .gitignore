@@ -1,0 +1,48 @@
+# ==========================================
+# GLOBALES Y ADM. DE ENTORNOS
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.podspec.lock
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# FRONTEND (Angular)
+# ==========================================
+# Dependencias y compilación
+**/Frontend/gestion_solicitudes_front/node_modules/
+**/Frontend/gestion_solicitudes_front/dist/
+**/Frontend/gestion_solicitudes_front/tmp/
+**/Frontend/gestion_solicitudes_front/out-dist/
+
+# Caché local de Angular (Aquí están los 40k+ archivos)
+**/Frontend/gestion_solicitudes_front/.angular/
+
+# Logs y diagnóstico
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/.pnpm-debug.log*
+
+# Configuraciones de editores IDE
+**/Frontend/gestion_solicitudes_front/.idea/
+**/Frontend/gestion_solicitudes_front/.vscode/
+
+# Archivos de Git internos accidentales
+**/Frontend/gestion_solicitudes_front/.git/
+
+# ==========================================
+# BACKEND (Spring Boot / Maven)
+# ==========================================
+**/Backend/SistemaGestionSolicitudes/target/
+**/Backend/SistemaGestionSolicitudes/.mvn/wrapper/maven-wrapper.jar
+
+# Log de aplicaciones y archivos de bases de datos locales
+*.log
+**/Backend/SistemaGestionSolicitudes/.idea/
+**/Backend/SistemaGestionSolicitudes/*.iml
+**/Backend/SistemaGestionSolicitudes/.classpath
+**/Backend/SistemaGestionSolicitudes/.project
+**/Backend/SistemaGestionSolicitudes/.settings/

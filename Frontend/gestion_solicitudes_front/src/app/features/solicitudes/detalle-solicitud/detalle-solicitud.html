@@ -1,0 +1,389 @@
+<div class="detalle-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-hex">⬡</span>
+      <span class="logo-text">SGS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" (click)="volver()">
+        <span class="nav-icon">▦</span>
+        <span>Solicitudes</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">{{ userInitial() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">{{ userRole() }}</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">⏻</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-back" (click)="volver()">
+          <span>←</span>
+          <span>Volver</span>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-parent" (click)="volver()">Solicitudes</span>
+          <span class="breadcrumb-sep">/</span>
+          @if (solicitud()) {
+            <span class="breadcrumb-current">#{{ solicitud()!.id }}</span>
+          }
+        </div>
+      </div>
+
+      @if (solicitud()) {
+        <div class="action-buttons">
+          @if (puedeClasificar()) {
+            <button class="btn-action btn-blue" (click)="abrirModalClasificar()">Clasificar</button>
+          }
+          @if (puedeAsignar()) {
+            <button class="btn-action btn-blue" (click)="abrirModalAsignar()">
+              Asignar responsable
+            </button>
+          }
+          @if (puedeTomar()) {
+            <button class="btn-action btn-blue" (click)="tomarSolicitud()">Tomar solicitud</button>
+          }
+          @if (puedeAtender()) {
+            <button class="btn-action btn-amber" (click)="abrirModalAtender()">
+              Marcar como atendida
+            </button>
+          }
+          @if (puedeCerrar()) {
+            <button class="btn-action btn-accent" (click)="abrirModalCerrar()">
+              Cerrar solicitud
+            </button>
+          }
+        </div>
+      }
+    </header>
+
+    @if (loading()) {
+      <div class="state-center">
+        <div class="loader-ring"></div>
+        <span>Cargando solicitud...</span>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="state-center">
+        <span class="state-icon">⚠</span>
+        <span>{{ error() }}</span>
+        <button class="btn-retry" (click)="volver()">Volver a la lista</button>
+      </div>
+    }
+
+    @if (solicitud()) {
+      <div class="detalle-content">
+        <div class="solicitud-header">
+          <div class="solicitud-header-left">
+            <span class="solicitud-id">#{{ solicitud()!.id }}</span>
+            <h1 class="solicitud-tipo">{{ formatTipo(solicitud()!.tipoSolicitud) }}</h1>
+          </div>
+          <div class="solicitud-header-right">
+            <span class="badge-estado" [class]="'estado-' + solicitud()!.estado">
+              {{ formatEstado(solicitud()!.estado) }}
+            </span>
+            @if (solicitud()!.prioridad) {
+              <span class="badge-prioridad" [class]="'prio-' + solicitud()!.prioridad">
+                {{ solicitud()!.prioridad }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-card info-card-full">
+            <span class="info-label">Descripción</span>
+            <p class="info-value info-desc">{{ solicitud()!.descripcion }}</p>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Solicitante</span>
+            <div class="user-display">
+              <div class="user-dot">
+                {{ solicitud()!.solicitante!.nombre.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <p class="info-value">{{ solicitud()!.solicitante!.nombre }}</p>
+                <p class="info-sub">{{ solicitud()!.solicitante!.correo }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Responsable</span>
+            @if (solicitud()!.responsable) {
+              <div class="user-display">
+                <div class="user-dot user-dot-blue">
+                  {{ solicitud()!.responsable!.nombre.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <p class="info-value">{{ solicitud()!.responsable!.nombre }}</p>
+                  <p class="info-sub">{{ solicitud()!.responsable!.correo }}</p>
+                </div>
+              </div>
+            } @else {
+              <p class="info-empty">Sin asignar</p>
+            }
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Fecha de creación</span>
+            <p class="info-value">{{ solicitud()!.fecha | date: 'dd/MM/yyyy, h:mm a' }}</p>
+          </div>
+
+          <div class="info-card">
+            <span class="info-label">Justificación de prioridad</span>
+            @if (solicitud()!.justificacionPrioridad) {
+              <p class="info-value">{{ solicitud()!.justificacionPrioridad }}</p>
+            } @else {
+              <p class="info-empty">Sin justificación asignada</p>
+            }
+          </div>
+        </div>
+        @if (historial().length > 0) {
+          <div class="historial-section">
+            <h3 class="historial-titulo">Historial</h3>
+            <div class="historial-lista">
+              @for (h of historial(); track h.id) {
+                <div class="historial-item">
+                  <div class="historial-dot"></div>
+                  <div class="historial-info">
+                    <p class="historial-accion">{{ h.accion }}</p>
+                    <span class="historial-fecha">{{ h.fecha | date: 'dd/MM/yyyy, h:mm a' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<!-- MODAL: CLASIFICAR -->
+@if (modalClasificar()) {
+  <div class="modal-backdrop" (click)="cerrarModalClasificar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Clasificar solicitud</h2>
+        <button class="modal-close" (click)="cerrarModalClasificar()">✕</button>
+      </div>
+      <form [formGroup]="clasificarForm" (ngSubmit)="clasificar()" class="modal-form">
+        <!-- Botón IA va aquí, dentro del form -->
+        <div class="ia-sugerencia">
+          <button type="button" class="btn-ia" (click)="sugerirConIA()" [disabled]="loadingIA()">
+            @if (loadingIA()) {
+              <span class="spinner spinner-dark"></span> Analizando...
+            } @else {
+              ⬡ Sugerir con IA
+            }
+          </button>
+          @if (errorIA()) {
+            <span class="error-msg">{{ errorIA() }}</span>
+          }
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Prioridad</label>
+          <select class="field-input" formControlName="prioridad">
+            <option value="">Seleccionar...</option>
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Media</option>
+            <option value="BAJA">Baja</option>
+          </select>
+          @if (
+            clasificarForm.get('prioridad')!.touched &&
+            clasificarForm.get('prioridad')!.hasError('required')
+          ) {
+            <span class="error-msg">Selecciona una prioridad</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label">Justificación</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="justificacion"
+            placeholder="Explica el motivo de la clasificación..."
+            rows="4"
+          ></textarea>
+          @if (
+            clasificarForm.get('justificacion')!.touched &&
+            clasificarForm.get('justificacion')!.hasError('required')
+          ) {
+            <span class="error-msg">La justificación es obligatoria</span>
+          }
+        </div>
+        @if (errorClasificar()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorClasificar() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalClasificar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingClasificar()">
+            @if (loadingClasificar()) {
+              <span class="spinner"></span> Clasificando...
+            } @else {
+              Clasificar
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL: ASIGNAR RESPONSABLE -->
+@if (modalAsignar()) {
+  <div class="modal-backdrop" (click)="cerrarModalAsignar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Asignar responsable</h2>
+        <button class="modal-close" (click)="cerrarModalAsignar()">✕</button>
+      </div>
+      <div class="modal-form">
+        @if (loadingResponsables()) {
+          <div class="modal-loading">
+            <div class="loader-ring"></div>
+            <span>Cargando responsables...</span>
+          </div>
+        } @else {
+          <div class="field-group">
+            <label class="field-label">Responsable</label>
+            <select class="field-input" (change)="seleccionarResponsable($event)">
+              <option value="">Seleccionar...</option>
+              @for (r of responsables(); track r.id) {
+                <option [value]="r.id">
+                  {{ r.nombre }} —
+                  {{ r.role === 'ROL_ADMINISTRATIVO' ? 'Administrativo' : 'Docente' }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+        @if (errorAsignar()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorAsignar() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalAsignar()">Cancelar</button>
+          <button
+            class="btn-confirm"
+            [disabled]="!responsableSeleccionado() || loadingAsignar()"
+            (click)="asignarResponsable()"
+          >
+            @if (loadingAsignar()) {
+              <span class="spinner"></span> Asignando...
+            } @else {
+              Asignar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL: ATENDER -->
+@if (modalAtender()) {
+  <div class="modal-backdrop" (click)="cerrarModalAtender()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Marcar como atendida</h2>
+        <button class="modal-close" (click)="cerrarModalAtender()">✕</button>
+      </div>
+      <form [formGroup]="atenderForm" (ngSubmit)="atender()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Anotación</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="anotacion"
+            placeholder="Describe cómo fue atendida la solicitud..."
+            rows="4"
+          ></textarea>
+          @if (
+            atenderForm.get('anotacion')!.touched &&
+            atenderForm.get('anotacion')!.hasError('required')
+          ) {
+            <span class="error-msg">La anotación es obligatoria</span>
+          }
+        </div>
+        @if (errorAtender()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorAtender() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalAtender()">Cancelar</button>
+          <button type="submit" class="btn-confirm btn-amber-confirm" [disabled]="loadingAtender()">
+            @if (loadingAtender()) {
+              <span class="spinner"></span> Guardando...
+            } @else {
+              Marcar como atendida
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL: CERRAR -->
+@if (modalCerrar()) {
+  <div class="modal-backdrop" (click)="cerrarModalCerrar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Cerrar solicitud</h2>
+        <button class="modal-close" (click)="cerrarModalCerrar()">✕</button>
+      </div>
+      <form [formGroup]="cerrarForm" (ngSubmit)="cerrar()" class="modal-form">
+        <div class="field-group">
+          <label class="field-label">Anotación de cierre</label>
+          <textarea
+            class="field-input field-textarea"
+            formControlName="anotacion"
+            placeholder="Describe el resultado final de la solicitud..."
+            rows="4"
+          ></textarea>
+          @if (
+            cerrarForm.get('anotacion')!.touched &&
+            cerrarForm.get('anotacion')!.hasError('required')
+          ) {
+            <span class="error-msg">La anotación es obligatoria</span>
+          }
+        </div>
+        @if (errorCerrar()) {
+          <div class="alert-error">
+            <span>⚠</span><span>{{ errorCerrar() }}</span>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="cerrarModalCerrar()">Cancelar</button>
+          <button type="submit" class="btn-confirm" [disabled]="loadingCerrar()">
+            @if (loadingCerrar()) {
+              <span class="spinner"></span> Cerrando...
+            } @else {
+              Cerrar solicitud
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
