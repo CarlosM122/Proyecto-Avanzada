@@ -8,6 +8,7 @@ import lombok.*;
 @DiscriminatorValue("DOCENTE")
 public class Docente extends Usuario {
 
+    @Enumerated(EnumType.STRING)
     private TipoContrato tipoContrato;
 
     public Docente(TipoContrato tipoContrato) {

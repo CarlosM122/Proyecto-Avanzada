@@ -1,6 +1,7 @@
 package uq.sistemagestionsolicitudes.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uq.sistemagestionsolicitudes.dto.LoginRequest;
 import uq.sistemagestionsolicitudes.dto.LoginResponse;

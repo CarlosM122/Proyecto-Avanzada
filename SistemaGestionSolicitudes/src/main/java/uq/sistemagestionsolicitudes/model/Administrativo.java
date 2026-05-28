@@ -11,6 +11,7 @@ public class Administrativo extends Usuario {
 
     @Enumerated(EnumType.STRING)
     private Area areaEncargada;
+    @Enumerated(EnumType.STRING)
     private TipoContrato tipoContrato;
 
     public Administrativo (Area areaEncargada, TipoContrato tipoContrato) {
